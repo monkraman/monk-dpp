@@ -1,0 +1,141 @@
+<div class="dashboard-page">
+  <!-- Top Charts Grid -->
+  <div class="charts-grid">
+    <!-- Chart 1: Product Material -->
+    <div class="chart-card">
+      <div class="card-header">
+        <div class="title-group">
+          <h2 class="card-title">Product Material</h2>
+          <p class="card-subtitle">Distribution of products based on material.</p>
+        </div>
+        <div class="filter-dropdown">
+          <span>{{ materialTopFilter }}</span>
+          <mat-icon class="dropdown-icon">expand_more</mat-icon>
+        </div>
+      </div>
+
+      <div class="chart-content">
+        <!-- Donut SVG -->
+        <div class="donut-wrapper">
+          <svg viewBox="0 0 100 100" class="donut-svg">
+            <circle cx="50" cy="50" r="38" fill="none" stroke="#e2edfb" stroke-width="14" />
+            <circle cx="50" cy="50" r="38" fill="none" stroke="#3A82D6" stroke-width="14"
+              stroke-dasharray="60 178" stroke-dashoffset="0" />
+            <circle cx="50" cy="50" r="38" fill="none" stroke="#1B5EB8" stroke-width="14"
+              stroke-dasharray="45 193" stroke-dashoffset="-60" />
+            <circle cx="50" cy="50" r="38" fill="none" stroke="#003B73" stroke-width="14"
+              stroke-dasharray="35 203" stroke-dashoffset="-105" />
+          </svg>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend-list">
+          <div *ngFor="let item of materials" class="legend-item">
+            <span class="legend-dot" [style.background-color]="item.color"></span>
+            <span class="legend-name" title="{{ item.name }}">{{ item.name }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart 2: Product Suppliers -->
+    <div class="chart-card">
+      <div class="card-header">
+        <div class="title-group">
+          <h2 class="card-title">Product Suppliers</h2>
+          <p class="card-subtitle">Products supplied by each vendor.</p>
+        </div>
+        <div class="filter-dropdown">
+          <span>{{ supplierTopFilter }}</span>
+          <mat-icon class="dropdown-icon">expand_more</mat-icon>
+        </div>
+      </div>
+
+      <div class="chart-content">
+        <!-- Donut SVG -->
+        <div class="donut-wrapper">
+          <svg viewBox="0 0 100 100" class="donut-svg">
+            <circle cx="50" cy="50" r="38" fill="none" stroke="#e2edfb" stroke-width="14" />
+            <circle cx="50" cy="50" r="38" fill="none" stroke="#003B73" stroke-width="14"
+              stroke-dasharray="90 148" stroke-dashoffset="0" />
+            <circle cx="50" cy="50" r="38" fill="none" stroke="#1B5EB8" stroke-width="14"
+              stroke-dasharray="40 198" stroke-dashoffset="-90" />
+            <circle cx="50" cy="50" r="38" fill="none" stroke="#3A82D6" stroke-width="14"
+              stroke-dasharray="30 208" stroke-dashoffset="-130" />
+          </svg>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend-list">
+          <div *ngFor="let item of suppliers" class="legend-item">
+            <span class="legend-dot" [style.background-color]="item.color"></span>
+            <span class="legend-name" title="{{ item.name }}">{{ item.name }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Workspace Row: Recent Passports Table + Activity Feed -->
+  <div class="bottom-grid">
+    <!-- Recent Passports Table -->
+    <div class="table-container">
+      <h3 class="section-heading">Recent passports</h3>
+
+      <div class="table-responsive">
+        <table class="monk-table">
+          <thead>
+            <tr>
+              <th>Passport ID</th>
+              <th>Type</th>
+              <th>From</th>
+              <th>To</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of passports">
+              <td class="id-cell"><code>{{ p.id }}</code></td>
+              <td>{{ p.type }}</td>
+              <td>{{ p.from }}</td>
+              <td>{{ p.to }}</td>
+              <td>
+                <span class="badge" [class.badge-published]="p.status === 'Published'" [class.badge-draft]="p.status === 'Draft'">
+                  {{ p.status }}
+                </span>
+              </td>
+              <td class="date-cell">{{ p.date }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Activity Feed -->
+    <div class="activity-container">
+      <div class="activity-header">
+        <h3 class="section-heading">Activity</h3>
+        <a href="javascript:void(0)" class="view-all-link">View all</a>
+      </div>
+
+      <div class="activity-list">
+        <div *ngFor="let act of activities" class="activity-item">
+          <div class="activity-avatar">
+            <svg viewBox="0 0 24 24" class="monk-circle-icon">
+              <circle cx="12" cy="12" r="10" stroke="#003B73" stroke-width="2" fill="#F0F7FF" />
+              <path d="M12 5C12 5 16 8 16 12C16 16 12 19 12 19C12 19 8 16 8 12C8 8 12 5 12 5Z" fill="#48BB78" />
+            </svg>
+          </div>
+          <div class="activity-content">
+            <div class="activity-meta">
+              <strong class="actor-name">{{ act.actor }}</strong>
+              <span class="activity-time">{{ act.timestamp }}</span>
+            </div>
+            <p class="activity-desc">{{ act.description }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

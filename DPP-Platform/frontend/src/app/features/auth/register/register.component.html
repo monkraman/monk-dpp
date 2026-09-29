@@ -1,0 +1,239 @@
+<div class="auth-page">
+  <div class="auth-split-wrapper">
+    <!-- Left Visual Branding Panel -->
+    <div class="brand-panel">
+      <div class="brand-top">
+        <div class="logo-badge">
+          <mat-icon class="logo-icon">qr_code_2</mat-icon>
+          <span class="logo-text">Monkspaces DPP</span>
+        </div>
+        <span class="compliance-badge">Pilot Onboarding</span>
+      </div>
+
+      <div class="brand-hero">
+        <h1 class="brand-heading">
+          Register Your Organization on the DPP Platform.
+        </h1>
+        <p class="brand-subtext">
+          Prepare for mandatory EU Battery Passport compliance (Feb 2027) with our enterprise data passport ecosystem.
+        </p>
+
+        <!-- Stepper Progress Indicator -->
+        <div class="stepper-overview">
+          <div class="step-badge" [class.active]="currentStep === 1" [class.completed]="currentStep > 1">
+            <span class="step-num">1</span>
+            <div class="step-info">
+              <strong>Organization Profile</strong>
+              <small>Company, industry & EU jurisdiction</small>
+            </div>
+          </div>
+          <div class="step-divider"></div>
+          <div class="step-badge" [class.active]="currentStep === 2">
+            <span class="step-num">2</span>
+            <div class="step-info">
+              <strong>Admin Account</strong>
+              <small>Root credentials & security</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="brand-footer">
+        <span>© 2026 Monkspaces. All rights reserved.</span>
+        <span>ESPR Regulation 2024/1781</span>
+      </div>
+    </div>
+
+    <!-- Right Register Form Panel -->
+    <div class="form-panel">
+      <div class="form-card">
+        <div class="form-header">
+          <div class="step-pill">Step {{ currentStep }} of 2</div>
+          <h2 class="form-title">
+            {{ currentStep === 1 ? 'Organization Details' : 'Administrator Account' }}
+          </h2>
+          <p class="form-subtitle">
+            {{ currentStep === 1 ? 'Enter your legal company details for passport provenance.' : 'Create the primary admin credentials for this workspace.' }}
+          </p>
+        </div>
+
+        <!-- Step 1: Organization Details Form -->
+        <form *ngIf="currentStep === 1" [formGroup]="orgForm" (ngSubmit)="goToStep(2)" class="register-form">
+          <div class="input-group">
+            <label class="input-label" for="org-name">Company / Organization Name *</label>
+            <div class="custom-input-wrapper" [class.has-error]="orgF['organizationName'].touched && orgF['organizationName'].invalid">
+              <mat-icon class="input-icon">business</mat-icon>
+              <input
+                id="org-name"
+                type="text"
+                formControlName="organizationName"
+                placeholder="e.g. Acme Battery Solutions GmbH"
+                required
+              />
+            </div>
+            <div *ngIf="orgF['organizationName'].touched && orgF['organizationName'].invalid" class="validation-message">
+              <span *ngIf="orgF['organizationName'].errors?.['required']">Organization name is required</span>
+              <span *ngIf="orgF['organizationName'].errors?.['minlength']">Minimum 2 characters required</span>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="org-industry">Industry Sector *</label>
+            <div class="custom-input-wrapper">
+              <mat-icon class="input-icon">category</mat-icon>
+              <select id="org-industry" formControlName="industry" class="custom-select">
+                <option *ngFor="let ind of industries" [value]="ind">{{ ind }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="org-country">Country of Incorporation *</label>
+            <div class="custom-input-wrapper">
+              <mat-icon class="input-icon">public</mat-icon>
+              <select id="org-country" formControlName="country" class="custom-select">
+                <option *ngFor="let c of countries" [value]="c.code">{{ c.name }}</option>
+              </select>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            id="register-step1-next"
+            class="submit-button"
+            [disabled]="orgForm.invalid"
+          >
+            <span>Continue to Admin Setup</span>
+            <mat-icon>arrow_forward</mat-icon>
+          </button>
+        </form>
+
+        <!-- Step 2: User Details Form -->
+        <form *ngIf="currentStep === 2" [formGroup]="userForm" (ngSubmit)="onSubmit()" class="register-form">
+          <div class="input-row">
+            <div class="input-group">
+              <label class="input-label" for="user-firstname">First Name *</label>
+              <div class="custom-input-wrapper" [class.has-error]="userF['firstName'].touched && userF['firstName'].invalid">
+                <mat-icon class="input-icon">person_outline</mat-icon>
+                <input id="user-firstname" type="text" formControlName="firstName" placeholder="First name" required />
+              </div>
+              <div *ngIf="userF['firstName'].touched && userF['firstName'].invalid" class="validation-message">
+                <span>First name is required</span>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label" for="user-lastname">Last Name *</label>
+              <div class="custom-input-wrapper" [class.has-error]="userF['lastName'].touched && userF['lastName'].invalid">
+                <mat-icon class="input-icon">person_outline</mat-icon>
+                <input id="user-lastname" type="text" formControlName="lastName" placeholder="Last name" required />
+              </div>
+              <div *ngIf="userF['lastName'].touched && userF['lastName'].invalid" class="validation-message">
+                <span>Last name is required</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="user-email">Work Email *</label>
+            <div class="custom-input-wrapper" [class.has-error]="userF['email'].touched && userF['email'].invalid">
+              <mat-icon class="input-icon">mail_outline</mat-icon>
+              <input id="user-email" type="email" formControlName="email" placeholder="admin@company.com" required />
+            </div>
+            <div *ngIf="userF['email'].touched && userF['email'].invalid" class="validation-message">
+              <span *ngIf="userF['email'].errors?.['required']">Email is required</span>
+              <span *ngIf="userF['email'].errors?.['email']">Please enter a valid email address</span>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="user-phone">Phone Number (Optional)</label>
+            <div class="custom-input-wrapper">
+              <mat-icon class="input-icon">phone</mat-icon>
+              <input id="user-phone" type="tel" formControlName="phone" placeholder="+49 123 4567890" />
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="user-password">Password (min. 8 characters) *</label>
+            <div class="custom-input-wrapper" [class.has-error]="userF['password'].touched && userF['password'].invalid">
+              <mat-icon class="input-icon">lock_outline</mat-icon>
+              <input
+                id="user-password"
+                [type]="hidePassword ? 'password' : 'text'"
+                formControlName="password"
+                placeholder="At least 8 characters"
+                required
+              />
+              <button
+                type="button"
+                class="password-toggle-btn"
+                (click)="togglePassword()"
+                aria-label="Toggle password"
+              >
+                <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+            </div>
+            <div *ngIf="userF['password'].touched && userF['password'].invalid" class="validation-message">
+              <span *ngIf="userF['password'].errors?.['required']">Password is required</span>
+              <span *ngIf="userF['password'].errors?.['minlength']">Password must be at least 8 characters</span>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label class="input-label" for="user-confirm-password">Confirm Password *</label>
+            <div class="custom-input-wrapper" [class.has-error]="userF['confirmPassword'].touched && userF['confirmPassword'].invalid">
+              <mat-icon class="input-icon">lock_outline</mat-icon>
+              <input
+                id="user-confirm-password"
+                [type]="hideConfirmPassword ? 'password' : 'text'"
+                formControlName="confirmPassword"
+                placeholder="Re-type password"
+                required
+              />
+              <button
+                type="button"
+                class="password-toggle-btn"
+                (click)="toggleConfirmPassword()"
+                aria-label="Toggle confirm password"
+              >
+                <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+            </div>
+            <div *ngIf="userF['confirmPassword'].touched && userF['confirmPassword'].invalid" class="validation-message">
+              <span *ngIf="userF['confirmPassword'].errors?.['required']">Please confirm your password</span>
+              <span *ngIf="userF['confirmPassword'].errors?.['passwordMismatch']">Passwords do not match</span>
+            </div>
+          </div>
+
+          <div class="action-buttons-row">
+            <button type="button" class="back-button" (click)="goToStep(1)">
+              <mat-icon>arrow_back</mat-icon>
+              <span>Back</span>
+            </button>
+
+            <button
+              type="submit"
+              id="register-submit-btn"
+              class="submit-button flex-1"
+              [disabled]="userForm.invalid || isLoading"
+            >
+              <span *ngIf="!isLoading">Create DPP Account</span>
+              <div *ngIf="isLoading" class="button-spinner-row">
+                <mat-spinner diameter="20"></mat-spinner>
+                <span>Provisioning organization...</span>
+              </div>
+            </button>
+          </div>
+        </form>
+
+        <div class="form-footer">
+          <p>
+            Already registered?
+            <a routerLink="/login" class="register-link">Sign in here</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
