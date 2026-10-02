@@ -1,0 +1,105 @@
+/* Design tokens for Monk Spaces DPP Platform */
+:root {
+  /* Brand Colors */
+  --ms-primary: #087A3D;
+  --ms-primary-dark: #075C30;
+  --ms-primary-light: #E8F5EC;
+  --ms-primary-variant: #D9ED9E;
+  
+  /* Neutrals */
+  --ms-background: #F7F9F8;
+  --ms-surface: #FFFFFF;
+  --ms-border: #DCE5DF;
+  
+  /* Text */
+  --ms-text-primary: #17201A;
+  --ms-text-secondary: #66736A;
+  --ms-text-disabled: #999999;
+  
+  /* Status */
+  --ms-success: #16803C;
+  --ms-warning: #B7791F;
+  --ms-error: #D92D20;
+  --ms-info: #3478A8;
+  
+  /* Semantic */
+  --ms-green-lightest: #F5FAF6;
+  --ms-green-light: #E8F5EC;
+  
+  /* Spacing */
+  --ms-spacing-xs: 4px;
+  --ms-spacing-sm: 8px;
+  --ms-spacing-md: 16px;
+  --ms-spacing-lg: 24px;
+  --ms-spacing-xl: 32px;
+  
+  /* Border Radius */
+  --ms-radius-sm: 4px;
+  --ms-radius-md: 8px;
+  --ms-radius-lg: 12px;
+  --ms-radius-full: 24px;
+  
+  /* Shadows */
+  --ms-shadow-sm: 0 1px 2px rgba(23, 32, 26, 0.05);
+  --ms-shadow-md: 0 4px 6px rgba(23, 32, 26, 0.1);
+  --ms-shadow-lg: 0 10px 15px rgba(23, 32, 26, 0.1);
+  
+  /* Typography Scale */
+  --ms-font-size-xs: 12px;
+  --ms-font-size-sm: 14px;
+  --ms-font-size-md: 16px;
+  --ms-font-size-lg: 20px;
+  --ms-font-size-xl: 24px;
+  --ms-font-size-2xl: 32px;
+  --ms-font-size-3xl: 48px;
+  
+  /* Component Heights */
+  --ms-btn-height: 40px;
+  --ms-input-height: 48px;
+  --ms-table-row-height: 56px;
+}
+
+/* Utility classes */
+.bg-primary { background-color: var(--ms-primary); }
+.bg-primary-dark { background-color: var(--ms-primary-dark); }
+.bg-success { background-color: var(--ms-success); }
+.bg-warning { background-color: var(--ms-warning); }
+.bg-error { background-color: var(--ms-error); }
+.bg-info { background-color: var(--ms-info); }
+.bg-surface { background-color: var(--ms-surface); }
+.bg-background { background-color: var(--ms-background); }
+
+.text-primary { color: var(--ms-text-primary); }
+.text-secondary { color: var(--ms-text-secondary); }
+.text-success { color: var(--ms-success); }
+.text-warning { color: var(--ms-warning); }
+.text-error { color: var(--ms-error); }
+
+.border { border: 1px solid var(--ms-border); }
+.rounded-sm { border-radius: var(--ms-radius-sm); }
+.rounded-md { border-radius: var(--ms-radius-md); }
+.rounded-lg { border-radius: var(--ms-radius-lg); }
+
+.btn {
+  height: var(--ms-btn-height);
+  border-radius: var(--ms-radius-md);
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary {
+  background-color: var(--ms-primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--ms-primary-dark);
+}
+
+.btn-secondary {
+  background-color: var(--ms-surface);
+  color: var(--ms-text-primary);
+  border: 1px solid var(--ms-border);
+}

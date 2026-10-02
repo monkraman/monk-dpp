@@ -31,30 +31,31 @@ import { MatTooltipModule } from '@angular/material/tooltip';
       font-weight: 500;
       white-space: nowrap;
     }
-    .status-badge--draft {
-      background: #e8eaf6;
-      color: #283593;
-    }
-    .status-badge--published, .status-badge--completed, .status-badge--active, .status-badge--approved {
-      background: #e8f5e9;
-      color: #2e7d32;
-    }
-    .status-badge--submitted, .status-badge--sent, .status-badge--responded {
-      background: #fff3e0;
-      color: #ef6c00;
-    }
-    .status-badge--archived, .status-badge--deleted, .status-badge--expired, .status-badge--rejected {
-      background: #fce4ec;
-      color: #c62828;
-    }
-    .status-badge--pending {
-      background: #fff8e1;
-      color: #f57f17;
-    }
-    .status-badge--error, .status-badge--failed {
-      background: #ffebee;
-      color: #c62828;
-    }
+    /* DPP-specific style overrides */
+      .status-badge--draft {
+        background: var(--ms-green-light);
+        color: var(--ms-primary-dark);
+      }
+      .status-badge--published, .status-badge--completed, .status-badge--active, .status-badge--approved {
+        background: #E8F5EC;
+        color: #075C30;
+      }
+      .status-badge--submitted, .status-badge--sent, .status-badge--responded {
+        background: #FFF8E1;
+        color: #B7791F;
+      }
+      .status-badge--archived, .status-badge--deleted, .status-badge--expired, .status-badge--rejected {
+        background: #F5F5F5;
+        color: #666666;
+      }
+      .status-badge--pending {
+        background: #FFF8E1;
+        color: #B7791F;
+      }
+      .status-badge--error, .status-badge--failed {
+        background: #FFEBEE;
+        color: #D92D20;
+      }
     .status-icon {
       font-size: 14px;
       width: 14px;
