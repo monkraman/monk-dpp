@@ -8,189 +8,207 @@ import {
   Request,
   Get,
   ClassSerializerInterceptor,
+  ConflictException,
+  UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto, RefreshTokenDto, UserProfileDto } from './dto/auth.dto';
+import { RegisterDto, LoginDto, RefreshTokenDto } from './dto/auth.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser, UserRequest } from '../common/decorators/current-user.decorator';
-import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { Throttle } from '@nestjs/throttler';
 import { UseInterceptors } from '@nestjs/common';
 import { Public } from '../common/decorators/public.decorator';
+import { UsersService } from '../users/users.service';
+import { OrganizationsService } from '../organizations/organizations.service';
+import { UserRole } from '../users/entities/user.entity';
 
 @ApiTags('Authentication')
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly usersService: UsersService,
+    private readonly orgService: OrganizationsService,
+  ) {}
 
   /**
-   * Register new organization + admin user
-   * Creates both organization and first user (admin)
+   * Register new organization + admin user in PostgreSQL
    */
   @Post('register')
   @Public()
-  @Throttle({ default: { ttl: 60000, limit: 5 } }) // 5 registrations per minute
+  @Throttle({ default: { ttl: 60000, limit: 10 } })
   @ApiOperation({ summary: 'Register new organization and admin user' })
   @ApiBody({ type: RegisterDto })
   @ApiResponse({ status: 201, description: 'Organization and admin user created successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 409, description: 'Email already exists' })
   async register(@Body() registerDto: RegisterDto) {
-    // This will be implemented with UserRepository
-    // For now, return a placeholder response
+    const existing = await this.usersService.findByEmail(registerDto.email);
+    if (existing) {
+      throw new ConflictException('Email already registered');
+    }
+
+    // 1. Create Organization
+    const organization = await this.orgService.create({
+      name: registerDto.organizationName,
+      email: registerDto.email,
+    });
+
+    // 2. Hash Password
+    const password_hash = await this.authService.hashPassword(registerDto.password);
+
+    // 3. Create Admin User
+    const user = await this.usersService.create({
+      organization_id: organization.id,
+      email: registerDto.email,
+      password_hash,
+      first_name: registerDto.firstName,
+      last_name: registerDto.lastName,
+      role: UserRole.ORG_ADMIN,
+      status: 'active',
+    });
+
+    // 4. Generate JWT Tokens
+    const tokens = this.authService.generateTokens({
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      organizationId: organization.id,
+      firstName: user.first_name,
+      lastName: user.last_name,
+    });
+
     return {
       message: 'Registration successful',
       user: {
-        id: 'placeholder-user-id',
-        email: registerDto.email,
-        firstName: registerDto.firstName,
-        lastName: registerDto.lastName,
-        role: 'admin',
+        id: user.id,
+        email: user.email,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        role: user.role,
         organization: {
-          id: 'placeholder-org-id',
-          name: registerDto.organizationName,
-          slug: registerDto.organizationName.toLowerCase().replace(/\s+/g, '-'),
+          id: organization.id,
+          name: organization.name,
         },
-        createdAt: new Date(),
+        createdAt: user.created_at,
       },
-      tokens: {
-        accessToken: this.authService.generateAccessToken({
-          sub: 'placeholder-user-id',
-          email: registerDto.email,
-          role: 'admin',
-          organizationId: 'placeholder-org-id',
-          firstName: registerDto.firstName,
-          lastName: registerDto.lastName,
-        }),
-        refreshToken: this.authService.generateRefreshToken({
-          sub: 'placeholder-user-id',
-          email: registerDto.email,
-          role: 'admin',
-          organizationId: 'placeholder-org-id',
-          firstName: registerDto.firstName,
-          lastName: registerDto.lastName,
-        }),
-        expiresIn: 900,
-      },
+      tokens,
     };
   }
 
   /**
-   * Login with email and password
+   * Login with email and password verified against PostgreSQL
    */
   @Post('login')
   @Public()
   @HttpCode(HttpStatus.OK)
-  @Throttle({ default: { ttl: 1000, limit: 10 } }) // 10 login attempts per second
+  @Throttle({ default: { ttl: 1000, limit: 10 } })
   @ApiOperation({ summary: 'Login with email and password' })
   @ApiBody({ type: LoginDto })
   @ApiResponse({ status: 200, description: 'Login successful, returns tokens' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(@Body() loginDto: LoginDto) {
-    // This will be implemented with UserRepository
-    // For now, validate input and return placeholder
     if (!loginDto.email || !loginDto.password) {
-      return {
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Email and password are required',
-      };
+      throw new BadRequestException('Email and password are required');
     }
 
-    // Placeholder: In real implementation, we would:
-    // 1. Find user by email
-    // 2. Compare password with hash
-    // 3. Generate tokens
-    // 4. Update lastLogin timestamp
+    const user = await this.usersService.findByEmail(loginDto.email);
+    if (!user) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    const isMatch = await this.authService.comparePasswords(
+      loginDto.password,
+      user.password_hash,
+    );
+    if (!isMatch) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    const tokens = this.authService.generateTokens({
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      organizationId: user.organization_id || '',
+      firstName: user.first_name,
+      lastName: user.last_name,
+    });
 
     return {
-      accessToken: this.authService.generateAccessToken({
-        sub: 'placeholder-user-id',
-        email: loginDto.email,
-        role: 'admin',
-        organizationId: 'placeholder-org-id',
-        firstName: 'User',
-        lastName: 'Test',
-      }),
-      refreshToken: this.authService.generateRefreshToken({
-        sub: 'placeholder-user-id',
-        email: loginDto.email,
-        role: 'admin',
-        organizationId: 'placeholder-org-id',
-        firstName: 'User',
-        lastName: 'Test',
-      }),
-      expiresIn: 900,
+      ...tokens,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        role: user.role,
+        organizationId: user.organization_id,
+        organization: user.organization ? {
+          id: user.organization.id,
+          name: user.organization.name,
+        } : null,
+      },
     };
   }
 
   /**
-   * Refresh access token using refresh token
+   * Refresh access token
    */
   @Post('refresh')
   @Public()
   @ApiOperation({ summary: 'Refresh access token' })
   @ApiBody({ type: RefreshTokenDto })
-  @ApiResponse({ status: 200, description: 'New access token generated' })
-  @ApiResponse({ status: 401, description: 'Invalid refresh token' })
   async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
     try {
       const payload = this.authService.verifyRefreshToken(refreshTokenDto.refreshToken);
-
-      // Check if token is still valid (not expired)
-      // In real implementation, we would check if refresh token is stored and not revoked
-
-      const newTokens = {
+      return {
         accessToken: this.authService.generateAccessToken(payload),
         refreshToken: this.authService.generateRefreshToken(payload),
         expiresIn: 900,
       };
-
-      return newTokens;
-    } catch (error) {
-      throw error; // Will be caught by exception filter
+    } catch {
+      throw new UnauthorizedException('Invalid or expired refresh token');
     }
   }
 
   /**
-   * Get current user profile
+   * Get current authenticated user profile
    */
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get current authenticated user profile' })
-  @ApiResponse({ status: 200, description: 'User profile data' })
-  @ApiResponse({ status: 401, description: 'Not authenticated' })
-  async getProfile(@CurrentUser() user: { sub: string; email: string; role: string; organizationId: string; firstName?: string; lastName?: string }) {
-    // In real implementation, fetch full user + organization from DB
+  async getProfile(@CurrentUser() currentUser: { sub: string }) {
+    const user = await this.usersService.findById(currentUser.sub);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
     return {
-      id: user.sub,
+      id: user.id,
       email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
+      firstName: user.first_name,
+      lastName: user.last_name,
       role: user.role,
-      organization: {
-        id: user.organizationId,
-        name: 'User Organization',
-        slug: 'user-organization',
-      },
-      createdAt: new Date(),
+      organizationId: user.organization_id,
+      organization: user.organization ? {
+        id: user.organization.id,
+        name: user.organization.name,
+      } : null,
+      createdAt: user.created_at,
     };
   }
 
   /**
-   * Logout (client-side token removal)
-   * Server-side: we would blacklist the refresh token
+   * Logout
    */
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Logout current session' })
-  @ApiResponse({ status: 204, description: 'Logged out successfully' })
   async logout(@Request() req: UserRequest) {
-    // In real implementation:
-    // 1. Blacklist the refresh token (store in DB with expiry)
-    // 2. Or delete refresh token from user's stored tokens
-    // For now, client just discards tokens
     return;
   }
 }

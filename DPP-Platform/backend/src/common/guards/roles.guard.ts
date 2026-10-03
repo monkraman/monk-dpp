@@ -26,6 +26,21 @@ export class RolesGuard implements CanActivate {
       return false;
     }
 
-    return requiredRoles.includes(user.role);
+    // Admins have access to all tenant operations
+    if (user.role === 'super_admin' || user.role === 'org_admin' || user.role === 'admin') {
+      return true;
+    }
+
+    // Direct match
+    if (requiredRoles.includes(user.role)) {
+      return true;
+    }
+
+    // Member aliases
+    if (requiredRoles.includes('member') && (user.role === 'product_manager' || user.role === 'compliance')) {
+      return true;
+    }
+
+    return false;
   }
 }
