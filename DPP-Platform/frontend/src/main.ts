@@ -4,8 +4,7 @@
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
 import { AppModule } from './app/app.module';
-import './styles/_design-tokens.scss';
-import './styles/styles.scss';
+
 
 platformBrowserDynamic()
   .bootstrapModule(AppModule)

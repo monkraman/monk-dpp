@@ -1,22 +1,22 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MaterialModule } from '../../shared/material.module';
 import { SharedModule } from '../../shared/shared.module';
-import { DashboardComponent } from './dashboard.component';
+import { AccessControlComponent } from './access-control.component';
 
-const routes: Routes = [{ path: '', component: DashboardComponent }];
+const routes: Routes = [{ path: '', component: AccessControlComponent }];
 
 @NgModule({
-  declarations: [DashboardComponent],
+  declarations: [AccessControlComponent],
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     MaterialModule,
     SharedModule,
     RouterModule.forChild(routes),
   ],
 })
-export class DashboardModule {}
+export class AccessControlModule {}

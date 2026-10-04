@@ -7,6 +7,8 @@ import { Roles } from '../common/guards/roles.guard';
 import { Public } from '../common/decorators/public.decorator';
 import { LoggingInterceptor } from '../common/interceptors/logging.interceptor';
 
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+
 @ApiTags('Export')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -20,15 +22,21 @@ export class ExportController {
   @Get('products/:id/jsonld')
   @Roles('admin', 'member', 'viewer')
   @ApiOperation({ summary: 'Export single product as JSON-LD' })
-  async exportProductJsonLd(@Param('id', ParseUUIDPipe) id: string) {
-    return this.exportService.exportProductJsonLd(id);
+  async exportProductJsonLd(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: { organizationId: string },
+  ) {
+    return this.exportService.exportProductJsonLd(id, user.organizationId);
   }
 
   @Get('dpps/:id/jsonld')
   @Roles('admin', 'member', 'viewer')
   @ApiOperation({ summary: 'Export single DPP as JSON-LD' })
-  async exportDppJsonLd(@Param('id', ParseUUIDPipe) id: string) {
-    return this.exportService.exportDppJsonLd(id);
+  async exportDppJsonLd(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: { organizationId: string },
+  ) {
+    return this.exportService.exportDppJsonLd(id, user.organizationId);
   }
 
   // ===== CSV Exports =====
@@ -36,9 +44,13 @@ export class ExportController {
   @Get('products/csv')
   @Roles('admin', 'member')
   @ApiOperation({ summary: 'Export product list as CSV' })
-  async exportProductsCsv(@Query('category') category?: string, @Query('status') status?: string) {
+  async exportProductsCsv(
+    @CurrentUser() user: { organizationId: string },
+    @Query('category') category?: string,
+    @Query('status') status?: string,
+  ) {
     return this.exportService.exportProductsCsv(
-      'current-org-id', // Will come from CurrentUser
+      user.organizationId,
       { category, status },
     );
   }
@@ -46,8 +58,8 @@ export class ExportController {
   @Get('dpps/csv')
   @Roles('admin', 'member')
   @ApiOperation({ summary: 'Export DPP list as CSV' })
-  async exportDppsCsv() {
-    return this.exportService.exportDppsCsv('current-org-id');
+  async exportDppsCsv(@CurrentUser() user: { organizationId: string }) {
+    return this.exportService.exportDppsCsv(user.organizationId);
   }
 
   // ===== PDF Reports =====
@@ -56,8 +68,12 @@ export class ExportController {
   @Roles('admin', 'member')
   @ApiProduces('application/pdf')
   @ApiOperation({ summary: 'Export PDF report for product or DPP' })
-  async exportPdf(@Param('type') type: 'dpp' | 'product', @Param('id', ParseUUIDPipe) id: string) {
-    return this.exportService.exportPdf(type, id);
+  async exportPdf(
+    @Param('type') type: 'dpp' | 'product',
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: { organizationId: string },
+  ) {
+    return this.exportService.exportPdf(type, id, user.organizationId);
   }
 
   // ===== Public JSON-LD (for QR scan) =====

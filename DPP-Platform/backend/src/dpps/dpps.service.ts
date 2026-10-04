@@ -36,9 +36,13 @@ export class DppsService {
     return dpp;
   }
 
-  async findByProductId(productId: string): Promise<Dpp | null> {
+  async findByProductId(productId: string, orgId?: string): Promise<Dpp | null> {
+    const where: { product_id: string; organization_id?: string } = { product_id: productId };
+    if (orgId) {
+      where.organization_id = orgId;
+    }
     return this.dppRepository.findOne({
-      where: { product_id: productId },
+      where,
       relations: ['product'],
     });
   }
@@ -62,7 +66,7 @@ export class DppsService {
       throw new NotFoundException(`Product with ID ${productId} not found`);
     }
 
-    const existing = await this.findByProductId(productId);
+    const existing = await this.findByProductId(productId, orgId);
     if (existing) {
       throw new BadRequestException('A Digital Product Passport already exists for this product');
     }
@@ -126,10 +130,13 @@ export class DppsService {
   async update(id: string, updateDppDto: Record<string, unknown>, orgId: string, userId?: string): Promise<Dpp> {
     const oldDpp = await this.findOne(id, orgId);
 
-    await this.dppRepository.update(id, {
-      ...updateDppDto,
-      version: (oldDpp.version || 1) + 1,
-    } as any);
+    await this.dppRepository.update(
+      { id, organization_id: orgId },
+      {
+        ...updateDppDto,
+        version: (oldDpp.version || 1) + 1,
+      } as any,
+    );
 
     const updated = await this.findOne(id, orgId);
 
@@ -150,10 +157,13 @@ export class DppsService {
 
     // Also update linked product status
     if (dpp.product_id) {
-      await this.productRepository.update(dpp.product_id, {
-        status: 'published',
-        published_at: dpp.published_at,
-      } as any);
+      await this.productRepository.update(
+        { id: dpp.product_id, organization_id: orgId },
+        {
+          status: 'published',
+          published_at: dpp.published_at,
+        } as any,
+      );
     }
 
     if (userId) {

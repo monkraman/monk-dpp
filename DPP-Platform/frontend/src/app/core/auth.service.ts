@@ -15,14 +15,15 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  role: 'admin' | 'member' | 'viewer' | 'supplier';
+  role: 'admin' | 'member' | 'viewer' | 'supplier' | string;
   phone?: string;
-  organization: {
+  organizationId?: string;
+  organization?: {
     id: string;
     name: string;
-    slug: string;
+    slug?: string;
   };
-  createdAt: string;
+  createdAt?: string;
 }
 
 const TOKEN_KEY = 'dpp_access_token';
@@ -114,10 +115,16 @@ export class AuthService {
    * Login
    */
   login(email: string, password: string): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, { email, password }).pipe(
+    return this.http.post<any>(`${this.apiUrl}/login`, { email, password }).pipe(
       tap(response => {
-        this.setTokens(response.accessToken, response.refreshToken);
-        // After login, fetch user profile and cache it
+        const accessToken = response.accessToken || response.tokens?.accessToken;
+        const refreshToken = response.refreshToken || response.tokens?.refreshToken;
+        if (accessToken) {
+          this.setTokens(accessToken, refreshToken || '');
+        }
+        if (response.user) {
+          this.setCurrentUser(response.user);
+        }
       }),
       catchError(error => {
         return throwError(() => error);
@@ -139,8 +146,12 @@ export class AuthService {
   }): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/register`, data).pipe(
       tap((response: any) => {
-        if (response?.accessToken) {
-          this.setTokens(response.accessToken, response.refreshToken);
+        const accessToken = response.accessToken || response.tokens?.accessToken;
+        const refreshToken = response.refreshToken || response.tokens?.refreshToken;
+        if (accessToken) {
+          this.setTokens(accessToken, refreshToken || '');
+        }
+        if (response.user) {
           this.setCurrentUser(response.user);
         }
       })

@@ -11,22 +11,30 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSortModule } from '@angular/material/sort';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { FormsModule } from '@angular/forms';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatMenuModule } from '@angular/material/menu';
+import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 
-import { Product, PaginatedResponse } from '../../models/dpp.models';
-import { ProductService } from '../services/product.service';
+import { Product } from '../../../models/dpp.models';
+import { ProductService } from '../../../core/product.service';
 
 @Component({
   selector: 'app-product-library',
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     MatTableModule,
     MatIconModule,
     MatButtonModule,
     MatInputModule,
     MatSelectModule,
     MatSortModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatMenuModule,
+    MatBadgeModule,
+    StatusBadgeComponent,
   ],
   template: `
     <div class="product-library">
@@ -62,15 +70,15 @@ import { ProductService } from '../services/product.service';
       <!-- Filter Menu -->
       <mat-menu #filterMenu="matMenu">
         <div mat-menu-content>
-          <mat-menu-item *ngFor="let filter of filters" (click)="applyFilter(filter)">
+          <button mat-menu-item *ngFor="let filter of filters" (click)="applyFilter(filter)">
             <mat-icon>{{ filter.icon }}</mat-icon>
             <span>{{ filter.label }}</span>
-            <mat-badge 
+            <span 
               *ngIf="activeFilters[filter.key]" 
-              [value]="activeFilters[filter.key].length" 
-              color="primary"
-            ></mat-badge>
-          </mat-menu-item>
+              [matBadge]="activeFilters[filter.key].length" 
+              matBadgeColor="primary"
+            ></span>
+          </button>
         </div>
       </mat-menu>
 
@@ -238,12 +246,12 @@ export class ProductLibraryComponent implements OnInit {
       params.search = this.searchQuery;
     }
     
-    this.productService.getProducts(this.orgId, params).subscribe({
-      next: (response: PaginatedResponse<Product>) => {
-        this.products = response.data;
-        this.totalPages = Math.ceil(response.meta.total / this.limit);
+    this.productService.getProducts(params).subscribe({
+      next: (response: any) => {
+        this.products = response.data || [];
+        this.totalPages = Math.ceil((response.meta?.total || 1) / this.limit);
       },
-      error: (error) => console.error('Error loading products:', error),
+      error: (error: any) => console.error('Error loading products:', error),
       complete: () => this.loading = false
     });
   }

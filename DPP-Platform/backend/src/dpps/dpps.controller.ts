@@ -55,16 +55,19 @@ export class DppsController {
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateDppDto: Record<string, unknown>,
-    @CurrentUser() user: { organizationId: string },
+    @CurrentUser() user: { organizationId: string; sub: string },
   ) {
-    return this.dppsService.update(id, updateDppDto, user.organizationId);
+    return this.dppsService.update(id, updateDppDto, user.organizationId, user.sub);
   }
 
   @Put(':id/publish')
   @Roles('admin')
   @ApiOperation({ summary: 'Publish DPP (lock version, make visible)' })
-  async publish(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: { organizationId: string }) {
-    return this.dppsService.publish(id, user.organizationId);
+  async publish(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: { organizationId: string; sub: string },
+  ) {
+    return this.dppsService.publish(id, user.organizationId, user.sub);
   }
 
   @Get(':id/history')

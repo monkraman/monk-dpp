@@ -3,6 +3,7 @@ import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { Title } from '@angular/platform-browser';
 import { AuthService, User } from './core/auth.service';
+import { ThemeService } from './core/services/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -72,8 +73,9 @@ import { AuthService, User } from './core/auth.service';
             </div>
             <div class="user-info">
               <span class="user-name">{{ currentUser?.firstName || 'Raman' }} {{ currentUser?.lastName || 'Thakur' }}</span>
-              <span class="user-email" title="{{ currentUser?.email || 'raman@monkspaces.com' }}">
-                {{ currentUser?.email || 'raman@monkspace...' }}
+              <span class="user-org" *ngIf="currentUser?.organization?.name">{{ currentUser?.organization?.name }}</span>
+              <span class="user-email" title="{{ currentUser?.email || 'admin@monkspaces.com' }}">
+                {{ currentUser?.email || 'admin@monkspaces.com' }}
               </span>
             </div>
             <button class="logout-btn" (click)="logout()" title="Log out">
@@ -172,21 +174,21 @@ import { AuthService, User } from './core/auth.service';
       }
 
       &:hover {
-        background-color: #f9fafb;
-        color: #111827;
+        background-color: var(--bg-hover);
+        color: var(--text-primary);
 
         .nav-icon {
-          color: #111827;
+          color: var(--text-primary);
         }
       }
 
       &.active {
-        background-color: var(--bg-active-nav, #eef4fa);
-        color: var(--brand-primary, #3b5778);
+        background-color: var(--bg-active-nav);
+        color: var(--brand-accent);
         font-weight: 600;
 
         .nav-icon {
-          color: var(--brand-primary, #3b5778);
+          color: var(--brand-accent);
         }
       }
     }
@@ -264,7 +266,16 @@ import { AuthService, User } from './core/auth.service';
         .user-name {
           font-size: 13px;
           font-weight: 600;
-          color: #111827;
+          color: var(--text-primary);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .user-org {
+          font-size: 11px;
+          font-weight: 600;
+          color: var(--brand-accent);
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -272,7 +283,7 @@ import { AuthService, User } from './core/auth.service';
 
         .user-email {
           font-size: 11px;
-          color: #6b7280;
+          color: var(--text-muted);
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -283,7 +294,7 @@ import { AuthService, User } from './core/auth.service';
         background: none;
         border: none;
         cursor: pointer;
-        color: #9ca3af;
+        color: var(--text-light);
         display: flex;
         align-items: center;
         padding: 4px;
@@ -306,8 +317,8 @@ import { AuthService, User } from './core/auth.service';
       flex: 1;
       height: 100vh;
       overflow-y: auto;
-      background-color: #ffffff;
-      padding: 24px 32px 40px;
+      background-color: var(--bg-page);
+      padding: 28px 36px 48px;
     }
   `],
 })
@@ -320,10 +331,12 @@ export class AppComponent implements OnInit {
     private router: Router,
     private titleService: Title,
     private authService: AuthService,
+    private themeService: ThemeService,
   ) {}
 
   ngOnInit(): void {
     this.titleService.setTitle('Monk Spaces - DPP Platform');
+    this.themeService.initTheme();
     this.currentUser = this.authService.getCurrentUser();
 
     this.checkLayout(this.router.url);

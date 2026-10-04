@@ -12,10 +12,11 @@ export class ExportService {
   /**
    * Export single product as JSON-LD
    */
-  async exportProductJsonLd(productId: string) {
+  async exportProductJsonLd(productId: string, orgId?: string) {
     // Placeholder — fetch product + DPP data, build JSON-LD
     return {
       productId,
+      organizationId: orgId,
       jsonLd: {},
       qrCodeDataUrl: '',
     };
@@ -24,10 +25,11 @@ export class ExportService {
   /**
    * Export single DPP as JSON-LD
    */
-  async exportDppJsonLd(dppId: string) {
+  async exportDppJsonLd(dppId: string, orgId?: string) {
     // Placeholder
     return {
       dppId,
+      organizationId: orgId,
       jsonLd: {},
       qrCodeDataUrl: '',
     };
@@ -64,10 +66,11 @@ export class ExportService {
   /**
    * Export as PDF (report)
    */
-  async exportPdf(reportType: 'dpp' | 'product', id: string) {
+  async exportPdf(reportType: 'dpp' | 'product', id: string, orgId?: string) {
     // Placeholder — use PDFKit or similar
     return {
       filename: `${reportType}-${id}-report.pdf`,
+      organizationId: orgId,
       content: Buffer.from('PDF content placeholder'),
       contentType: 'application/pdf',
     };

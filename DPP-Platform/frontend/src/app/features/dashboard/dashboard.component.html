@@ -1,141 +1,344 @@
-<div class="dashboard-page">
-  <!-- Top Charts Grid -->
-  <div class="charts-grid">
-    <!-- Chart 1: Product Material -->
-    <div class="chart-card">
-      <div class="card-header">
-        <div class="title-group">
-          <h2 class="card-title">Product Material</h2>
-          <p class="card-subtitle">Distribution of products based on material.</p>
-        </div>
-        <div class="filter-dropdown">
-          <span>{{ materialTopFilter }}</span>
-          <mat-icon class="dropdown-icon">expand_more</mat-icon>
-        </div>
+<div class="dashboard-viewport">
+  <!-- 1. Executive Context Header -->
+  <header class="executive-header">
+    <div class="header-main">
+      <div class="greeting-badge-row">
+        <span class="platform-badge">
+          <mat-icon class="badge-icon">verified</mat-icon>
+          EU Digital Product Passport (ESPR)
+        </span>
+        <span class="tenant-badge" *ngIf="currentUser?.organization?.name">
+          <mat-icon class="tenant-icon">business</mat-icon>
+          {{ currentUser?.organization?.name }}
+        </span>
       </div>
+      <h1 class="executive-title">Digital Product Passport Operations</h1>
+      <p class="executive-subtitle">
+        Universal product passport registry, circularity metrics, and EU regulatory compliance across all product sectors.
+      </p>
+    </div>
 
-      <div class="chart-content">
-        <!-- Donut SVG -->
-        <div class="donut-wrapper">
-          <svg viewBox="0 0 100 100" class="donut-svg">
-            <circle cx="50" cy="50" r="38" fill="none" stroke="#e2edfb" stroke-width="14" />
-            <circle cx="50" cy="50" r="38" fill="none" stroke="#3A82D6" stroke-width="14"
-              stroke-dasharray="60 178" stroke-dashoffset="0" />
-            <circle cx="50" cy="50" r="38" fill="none" stroke="#1B5EB8" stroke-width="14"
-              stroke-dasharray="45 193" stroke-dashoffset="-60" />
-            <circle cx="50" cy="50" r="38" fill="none" stroke="#003B73" stroke-width="14"
-              stroke-dasharray="35 203" stroke-dashoffset="-105" />
-          </svg>
-        </div>
+    <!-- Action Toolbar -->
+    <div class="header-actions">
+      <!-- Live Theme Switcher -->
+      <div class="theme-picker-container">
+        <button
+          type="button"
+          class="btn-theme-selector"
+          (click)="toggleThemePicker()"
+          title="Customize Theme & Color Palette"
+        >
+          <mat-icon class="btn-icon">palette</mat-icon>
+          <span class="theme-name">{{ activeTheme.name.split(' ')[0] }} Theme</span>
+          <mat-icon class="dropdown-chevron">expand_more</mat-icon>
+        </button>
 
-        <!-- Legend -->
-        <div class="legend-list">
-          <div *ngFor="let item of materials" class="legend-item">
-            <span class="legend-dot" [style.background-color]="item.color"></span>
-            <span class="legend-name" title="{{ item.name }}">{{ item.name }}</span>
+        <!-- Theme Dropdown Popover -->
+        <div class="theme-dropdown-panel" *ngIf="showThemePicker">
+          <div class="dropdown-header">
+            <h4>Brand & Theme Settings</h4>
+            <p>Single source of truth. Configurable across all components.</p>
+          </div>
+          <div class="theme-options-list">
+            <button
+              type="button"
+              *ngFor="let t of themeService.availableThemes"
+              class="theme-option-btn"
+              [class.active]="t.id === activeTheme.id"
+              (click)="applyTheme(t.id)"
+            >
+              <div class="theme-swatch-row">
+                <span class="swatch-circle" [style.background-color]="t.colors.primary"></span>
+                <span class="swatch-circle" [style.background-color]="t.colors.accent"></span>
+                <span class="swatch-circle" [style.background-color]="t.colors.bgPage"></span>
+              </div>
+              <div class="theme-meta">
+                <span class="theme-title">{{ t.name }}</span>
+                <span class="theme-desc">{{ t.tagline }}</span>
+              </div>
+              <mat-icon class="check-icon" *ngIf="t.id === activeTheme.id">check</mat-icon>
+            </button>
           </div>
         </div>
       </div>
+
+      <!-- Export Audit Button -->
+      <button type="button" class="btn-secondary" (click)="exportAuditReport()">
+        <mat-icon class="btn-icon">download</mat-icon>
+        <span>Export Audit Pack</span>
+      </button>
+
+      <!-- Primary Action: Create DPP -->
+      <button type="button" class="btn-primary" (click)="createNewPassport()">
+        <mat-icon class="btn-icon">add_circle</mat-icon>
+        <span>Create Passport</span>
+      </button>
     </div>
+  </header>
 
-    <!-- Chart 2: Product Suppliers -->
-    <div class="chart-card">
-      <div class="card-header">
-        <div class="title-group">
-          <h2 class="card-title">Product Suppliers</h2>
-          <p class="card-subtitle">Products supplied by each vendor.</p>
-        </div>
-        <div class="filter-dropdown">
-          <span>{{ supplierTopFilter }}</span>
-          <mat-icon class="dropdown-icon">expand_more</mat-icon>
-        </div>
-      </div>
+  <!-- 2. Universal KPI Row (Using Reusable <app-stat-card>) -->
+  <section class="kpi-grid">
+    <app-stat-card
+      label="Total Digital Passports"
+      value="1,420"
+      change="+14.2%"
+      trend="positive"
+      detail="Active across all production lines"
+      icon="layers"
+    ></app-stat-card>
 
-      <div class="chart-content">
-        <!-- Donut SVG -->
-        <div class="donut-wrapper">
-          <svg viewBox="0 0 100 100" class="donut-svg">
-            <circle cx="50" cy="50" r="38" fill="none" stroke="#e2edfb" stroke-width="14" />
-            <circle cx="50" cy="50" r="38" fill="none" stroke="#003B73" stroke-width="14"
-              stroke-dasharray="90 148" stroke-dashoffset="0" />
-            <circle cx="50" cy="50" r="38" fill="none" stroke="#1B5EB8" stroke-width="14"
-              stroke-dasharray="40 198" stroke-dashoffset="-90" />
-            <circle cx="50" cy="50" r="38" fill="none" stroke="#3A82D6" stroke-width="14"
-              stroke-dasharray="30 208" stroke-dashoffset="-130" />
-          </svg>
-        </div>
+    <app-stat-card
+      label="EU Regulatory Conformity"
+      value="99.4%"
+      change="+1.8%"
+      trend="positive"
+      detail="ESPR & Sector Standards compliant"
+      icon="verified"
+    ></app-stat-card>
 
-        <!-- Legend -->
-        <div class="legend-list">
-          <div *ngFor="let item of suppliers" class="legend-item">
-            <span class="legend-dot" [style.background-color]="item.color"></span>
-            <span class="legend-name" title="{{ item.name }}">{{ item.name }}</span>
+    <app-stat-card
+      label="Supply Chain Traceability"
+      value="Tier 1–3"
+      change="128 Verified"
+      trend="neutral"
+      detail="Due Diligence mapped & audited"
+      icon="hub"
+    ></app-stat-card>
+
+    <app-stat-card
+      label="Average Circularity Ratio"
+      value="38.2%"
+      change="+5.4%"
+      trend="positive"
+      detail="Recycled / bio-based content"
+      icon="recycling"
+    ></app-stat-card>
+  </section>
+
+  <!-- 3. Sector Distribution & Compliance Analytics -->
+  <section class="analytics-row">
+    <!-- Card 1: ESPR Product Sector Breakdown (Using Reusable <app-progress-bar>) -->
+    <div class="analytics-card">
+      <div class="card-head">
+        <div class="head-title-wrap">
+          <div class="icon-chip">
+            <mat-icon>category</mat-icon>
+          </div>
+          <div>
+            <h3 class="card-heading">Product Sector Distribution</h3>
+            <p class="card-subheading">EU Ecodesign for Sustainable Products Regulation (ESPR) coverage</p>
           </div>
         </div>
+        <span class="coverage-pill">Multi-Sector DPP</span>
+      </div>
+
+      <div class="progress-meters-list">
+        <app-progress-bar
+          *ngFor="let s of sectorDistributions"
+          [label]="s.label"
+          [value]="s.value"
+          [target]="s.target"
+          unit="%"
+          [color]="s.color"
+          [subtext]="s.subtext"
+        ></app-progress-bar>
       </div>
     </div>
-  </div>
 
-  <!-- Bottom Workspace Row: Recent Passports Table + Activity Feed -->
-  <div class="bottom-grid">
-    <!-- Recent Passports Table -->
-    <div class="table-container">
-      <h3 class="section-heading">Recent passports</h3>
+    <!-- Card 2: DPP Lifecycle & Verification Flow -->
+    <div class="analytics-card">
+      <div class="card-head">
+        <div class="head-title-wrap">
+          <div class="icon-chip accent-chip">
+            <mat-icon>schema</mat-icon>
+          </div>
+          <div>
+            <h3 class="card-heading">Passport Verification Pipeline</h3>
+            <p class="card-subheading">Lifecycle stages from initial supplier ingest to public registry</p>
+          </div>
+        </div>
+        <span class="live-pill">
+          <span class="pulse-dot"></span>
+          Live Sync
+        </span>
+      </div>
 
+      <div class="pipeline-steps-grid">
+        <div class="pipeline-step-item">
+          <div class="step-badge draft-step">1</div>
+          <div class="step-text">
+            <span class="step-name">Draft & Ingestion</span>
+            <span class="step-desc">Supplier raw data upload</span>
+          </div>
+          <span class="step-count">140 DPPs</span>
+        </div>
+
+        <div class="pipeline-step-item">
+          <div class="step-badge review-step">2</div>
+          <div class="step-text">
+            <span class="step-name">Technical Review</span>
+            <span class="step-desc">Material & LCA validation</span>
+          </div>
+          <span class="step-count">214 DPPs</span>
+        </div>
+
+        <div class="pipeline-step-item">
+          <div class="step-badge audit-step">3</div>
+          <div class="step-text">
+            <span class="step-name">Conformity Audit</span>
+            <span class="step-desc">Third-party verification</span>
+          </div>
+          <span class="step-count">182 DPPs</span>
+        </div>
+
+        <div class="pipeline-step-item">
+          <div class="step-badge published-step">4</div>
+          <div class="step-text">
+            <span class="step-name">Published to EU Registry</span>
+            <span class="step-desc">GS1 Digital Link & QR live</span>
+          </div>
+          <span class="step-count published-highlight">884 Live</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Universal DPP Registry Section -->
+  <section class="registry-section">
+    <!-- Top Filter & Search Bar -->
+    <div class="registry-controls-card">
+      <div class="controls-row-top">
+        <div class="title-with-count">
+          <h2 class="section-title">Digital Passport Registry</h2>
+          <span class="count-pill">{{ filteredPassports.length }} Passports</span>
+        </div>
+
+        <!-- Reusable Search Input -->
+        <app-search-input
+          placeholder="Search by ID, product, GTIN, material..."
+          [maxWidth]="340"
+          (searchChange)="onSearchChange($event)"
+        ></app-search-input>
+      </div>
+
+      <div class="controls-row-bottom">
+        <!-- Reusable Industry Filter Tabs -->
+        <app-filter-tabs
+          [tabs]="industryTabs"
+          [activeTab]="activeIndustryFilter"
+          (tabChange)="onIndustryTabChange($event)"
+        ></app-filter-tabs>
+
+        <!-- Reusable Status Filter Tabs -->
+        <app-filter-tabs
+          [tabs]="statusTabs"
+          [activeTab]="activeStatusFilter"
+          (tabChange)="onStatusTabChange($event)"
+        ></app-filter-tabs>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
       <div class="table-responsive">
-        <table class="monk-table">
+        <table class="enterprise-table">
           <thead>
             <tr>
-              <th>Passport ID</th>
-              <th>Type</th>
-              <th>From</th>
-              <th>To</th>
+              <th>Passport & Product</th>
+              <th>Sector</th>
+              <th>Material & Circularity</th>
+              <th>Carbon Footprint</th>
+              <th>Origin Facility</th>
               <th>Status</th>
-              <th>Date</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let p of passports">
-              <td class="id-cell"><code>{{ p.id }}</code></td>
-              <td>{{ p.type }}</td>
-              <td>{{ p.from }}</td>
-              <td>{{ p.to }}</td>
+            <tr
+              *ngFor="let p of filteredPassports"
+              class="table-row-interactive"
+              (click)="viewPassportDetails(p)"
+            >
+              <!-- Product & Passport ID -->
+              <td class="product-cell">
+                <div class="product-avatar">
+                  <mat-icon *ngIf="p.industryCode === 'TEXTILES'">checkroom</mat-icon>
+                  <mat-icon *ngIf="p.industryCode === 'BATTERIES'">battery_charging_full</mat-icon>
+                  <mat-icon *ngIf="p.industryCode === 'ELECTRONICS'">devices</mat-icon>
+                  <mat-icon *ngIf="p.industryCode === 'PACKAGING'">inventory_2</mat-icon>
+                </div>
+                <div class="product-text">
+                  <span class="product-name">{{ p.productName }}</span>
+                  <div class="id-subrow">
+                    <code class="dpp-id">{{ p.id }}</code>
+                    <span class="gtin-code">GTIN: {{ p.gtin }}</span>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Sector -->
               <td>
-                <span class="badge" [class.badge-published]="p.status === 'Published'" [class.badge-draft]="p.status === 'Draft'">
-                  {{ p.status }}
+                <span class="sector-badge" [class]="'sector-' + p.industryCode.toLowerCase()">
+                  {{ p.industry }}
                 </span>
               </td>
-              <td class="date-cell">{{ p.date }}</td>
+
+              <!-- Material & Circularity -->
+              <td>
+                <div class="material-col">
+                  <span class="material-text">{{ p.materialComposition }}</span>
+                  <span class="circularity-pill">{{ p.recycledContentPct }}% Recycled</span>
+                </div>
+              </td>
+
+              <!-- Carbon Footprint -->
+              <td>
+                <div class="carbon-pill">
+                  <mat-icon class="carbon-leaf">eco</mat-icon>
+                  <span>{{ p.carbonKgCo2e }} kg CO₂e</span>
+                </div>
+              </td>
+
+              <!-- Origin Facility -->
+              <td class="facility-cell">
+                <span class="facility-name">{{ p.facilityOrigin }}</span>
+              </td>
+
+              <!-- Status (Using Reusable <app-status-badge>) -->
+              <td>
+                <app-status-badge [status]="p.status"></app-status-badge>
+              </td>
+
+              <!-- Actions -->
+              <td class="actions-cell" (click)="$event.stopPropagation()">
+                <button
+                  type="button"
+                  class="action-icon-btn"
+                  title="Copy GS1 Digital Link"
+                  (click)="copyDigitalLink(p.digitalLink, $event)"
+                >
+                  <mat-icon>link</mat-icon>
+                </button>
+                <button
+                  type="button"
+                  class="action-icon-btn"
+                  title="View Passport Details"
+                  (click)="viewPassportDetails(p)"
+                >
+                  <mat-icon>visibility</mat-icon>
+                </button>
+              </td>
+            </tr>
+
+            <tr *ngIf="filteredPassports.length === 0">
+              <td colspan="7" class="empty-row">
+                <mat-icon class="empty-icon">search_off</mat-icon>
+                <p>No passports match your selected industry or status filter.</p>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
-
-    <!-- Activity Feed -->
-    <div class="activity-container">
-      <div class="activity-header">
-        <h3 class="section-heading">Activity</h3>
-        <a href="javascript:void(0)" class="view-all-link">View all</a>
-      </div>
-
-      <div class="activity-list">
-        <div *ngFor="let act of activities" class="activity-item">
-          <div class="activity-avatar">
-            <svg viewBox="0 0 24 24" class="monk-circle-icon">
-              <circle cx="12" cy="12" r="10" stroke="#003B73" stroke-width="2" fill="#F0F7FF" />
-              <path d="M12 5C12 5 16 8 16 12C16 16 12 19 12 19C12 19 8 16 8 12C8 8 12 5 12 5Z" fill="#48BB78" />
-            </svg>
-          </div>
-          <div class="activity-content">
-            <div class="activity-meta">
-              <strong class="actor-name">{{ act.actor }}</strong>
-              <span class="activity-time">{{ act.timestamp }}</span>
-            </div>
-            <p class="activity-desc">{{ act.description }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  </section>
 </div>

@@ -77,10 +77,13 @@ export class ProductsService {
   async update(id: string, updateProductDto: Partial<Product>, orgId: string, userId?: string): Promise<Product> {
     const oldProduct = await this.findOne(id, orgId);
 
-    await this.productRepository.update(id, {
-      ...updateProductDto,
-      version: (oldProduct.version || 1) + 1,
-    } as any);
+    await this.productRepository.update(
+      { id, organization_id: orgId },
+      {
+        ...updateProductDto,
+        version: (oldProduct.version || 1) + 1,
+      } as any,
+    );
 
     const updated = await this.findOne(id, orgId);
 

@@ -1,0 +1,373 @@
+<div class="access-control-viewport">
+  <!-- 1. Executive Context Header -->
+  <header class="executive-header">
+    <div class="header-main">
+      <div class="greeting-badge-row">
+        <span class="platform-badge">
+          <mat-icon class="badge-icon">admin_panel_settings</mat-icon>
+          Identity & Governance
+        </span>
+        <span class="tenant-badge" *ngIf="currentUser?.organization?.name">
+          <mat-icon class="tenant-icon">business</mat-icon>
+          {{ currentUser?.organization?.name }}
+        </span>
+      </div>
+      <h1 class="executive-title">User & Access Management</h1>
+      <p class="executive-subtitle">
+        Manage platform super administrators, tenant organization admins, and cross-enterprise access boundaries.
+      </p>
+    </div>
+
+    <!-- Action Toolbar -->
+    <div class="header-actions">
+      <button type="button" class="btn-secondary" (click)="loadData()" [disabled]="isLoading" title="Refresh user list">
+        <mat-icon class="btn-icon" [class.spin]="isLoading">refresh</mat-icon>
+        <span>Refresh</span>
+      </button>
+
+      <button type="button" class="btn-primary" (click)="openCreateModal()">
+        <mat-icon class="btn-icon">person_add</mat-icon>
+        <span>Provision User</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. Governance KPI Metrics Grid -->
+  <section class="metrics-grid">
+    <app-stat-card
+      label="Total Directory Users"
+      [value]="users.length"
+      unit="Accounts"
+      change="Active Directory"
+      trend="positive"
+      detail="Across all registered tenants"
+      icon="people"
+    ></app-stat-card>
+
+    <app-stat-card
+      label="Super Administrators"
+      [value]="superAdminCount"
+      unit="Admins"
+      change="Cross-Tenant"
+      trend="neutral"
+      detail="Full system configuration rights"
+      icon="shield"
+    ></app-stat-card>
+
+    <app-stat-card
+      label="Organization Admins"
+      [value]="orgAdminCount"
+      unit="Admins"
+      change="Tenant Scoped"
+      trend="positive"
+      detail="Scoped to specific company orgs"
+      icon="business_center"
+    ></app-stat-card>
+
+    <app-stat-card
+      label="Connected Organizations"
+      [value]="totalOrgsCount"
+      unit="Companies"
+      change="Multi-Tenant"
+      trend="positive"
+      detail="Active enterprise tenants"
+      icon="domain"
+    ></app-stat-card>
+  </section>
+
+  <!-- 3. Directory Filter & Search Bar -->
+  <section class="controls-card">
+    <div class="controls-left">
+      <!-- Role Filter Tabs -->
+      <app-filter-tabs
+        [tabs]="roleTabs"
+        [activeTab]="activeRoleFilter"
+        (tabChange)="onRoleTabChange($event)"
+      ></app-filter-tabs>
+
+      <!-- Org Filter Dropdown -->
+      <div class="org-filter-wrap" *ngIf="organizations.length > 0">
+        <mat-icon class="filter-icon">business</mat-icon>
+        <select [(ngModel)]="selectedOrgFilter" class="org-select">
+          <option value="ALL">All Organizations</option>
+          <option *ngFor="let org of organizations" [value]="org.id">{{ org.name }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="controls-right">
+      <app-search-input
+        placeholder="Search user, email, or org..."
+        [maxWidth]="320"
+        [searchQuery]="searchQuery"
+        (searchChange)="onSearchChange($event)"
+      ></app-search-input>
+    </div>
+  </section>
+
+  <!-- 4. User Directory Data Table -->
+  <section class="table-container-card">
+    <!-- Loading State -->
+    <div class="table-loading-overlay" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <span>Loading user directory...</span>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+      <table class="user-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Role & Scope</th>
+            <th>Organization</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Empty State -->
+          <tr *ngIf="filteredUsers.length === 0 && !isLoading">
+            <td colspan="6" class="empty-state-cell">
+              <div class="empty-state">
+                <mat-icon class="empty-icon">search_off</mat-icon>
+                <h3>No users found</h3>
+                <p>No user accounts match the current filter or search criteria.</p>
+                <button type="button" class="btn-subtle" (click)="searchQuery = ''; activeRoleFilter = 'ALL'; selectedOrgFilter = 'ALL'">
+                  Reset Filters
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- User Rows -->
+          <tr *ngFor="let user of filteredUsers" [class.highlight-row]="isCurrentUser(user)">
+            <!-- User Info & Avatar -->
+            <td class="user-cell">
+              <div class="user-avatar" [class.avatar-super]="user.role === 'super_admin'">
+                {{ getUserInitials(user) }}
+              </div>
+              <div class="user-details">
+                <div class="user-name-row">
+                  <span class="user-name">{{ user.first_name }} {{ user.last_name }}</span>
+                  <span class="current-user-pill" *ngIf="isCurrentUser(user)">You</span>
+                </div>
+                <span class="user-email">{{ user.email }}</span>
+              </div>
+            </td>
+
+            <!-- Role Badge -->
+            <td>
+              <div class="role-badge-wrap">
+                <span class="role-badge" [ngClass]="getRoleBadgeClass(user.role)">
+                  <mat-icon class="role-badge-icon">
+                    {{ user.role === 'super_admin' ? 'admin_panel_settings' : 'manage_accounts' }}
+                  </mat-icon>
+                  {{ getRoleDisplay(user.role) }}
+                </span>
+              </div>
+            </td>
+
+            <!-- Organization -->
+            <td>
+              <div class="org-cell" *ngIf="user.organization">
+                <mat-icon class="org-icon">domain</mat-icon>
+                <span class="org-name">{{ user.organization.name }}</span>
+              </div>
+              <span class="text-muted italic" *ngIf="!user.organization">Global / Cross-Tenant</span>
+            </td>
+
+            <!-- Status -->
+            <td>
+              <app-status-badge [status]="user.status"></app-status-badge>
+            </td>
+
+            <!-- Created At -->
+            <td>
+              <span class="date-text">{{ user.created_at | date: 'mediumDate' }}</span>
+            </td>
+
+            <!-- Actions -->
+            <td class="text-right">
+              <div class="action-btn-group">
+                <button
+                  type="button"
+                  class="action-btn"
+                  (click)="openEditModal(user)"
+                  title="Edit user role and status"
+                >
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button
+                  type="button"
+                  class="action-btn action-delete"
+                  [disabled]="isCurrentUser(user)"
+                  (click)="promptDelete(user)"
+                  [title]="isCurrentUser(user) ? 'Cannot delete current account' : 'Delete user account'"
+                >
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<!-- ========================================================= -->
+<!-- 5. Provision / Edit User Modal Dialog                     -->
+<!-- ========================================================= -->
+<div class="modal-backdrop" *ngIf="isModalOpen" (click)="closeModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <div class="modal-header-icon-wrap">
+        <mat-icon>{{ modalMode === 'create' ? 'person_add' : 'manage_accounts' }}</mat-icon>
+      </div>
+      <div class="modal-header-text">
+        <h3>{{ modalMode === 'create' ? 'Provision New User' : 'Edit User Settings' }}</h3>
+        <p>{{ modalMode === 'create' ? 'Add a new administrator to the DPP platform' : 'Modify user permissions and account status' }}</p>
+      </div>
+      <button type="button" class="btn-close" (click)="closeModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Error Banner -->
+    <div class="error-banner" *ngIf="formError">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ formError }}</span>
+    </div>
+
+    <!-- Modal Form -->
+    <form [formGroup]="userForm" (ngSubmit)="saveUser()" class="modal-form">
+      <div class="form-row two-col">
+        <div class="form-group">
+          <label>First Name <span class="required">*</span></label>
+          <input type="text" formControlName="firstName" placeholder="e.g. John" class="form-input" />
+          <span class="field-error" *ngIf="userForm.get('firstName')?.touched && userForm.get('firstName')?.hasError('required')">
+            First name is required
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label>Last Name <span class="required">*</span></label>
+          <input type="text" formControlName="lastName" placeholder="e.g. Doe" class="form-input" />
+          <span class="field-error" *ngIf="userForm.get('lastName')?.touched && userForm.get('lastName')?.hasError('required')">
+            Last name is required
+          </span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Email Address <span class="required">*</span></label>
+        <input
+          type="email"
+          formControlName="email"
+          placeholder="admin@company.com"
+          class="form-input"
+          [readonly]="modalMode === 'edit'"
+        />
+        <span class="field-error" *ngIf="userForm.get('email')?.touched && userForm.get('email')?.hasError('required')">
+          Email is required
+        </span>
+        <span class="field-error" *ngIf="userForm.get('email')?.touched && userForm.get('email')?.hasError('email')">
+          Please enter a valid email address
+        </span>
+      </div>
+
+      <div class="form-group" *ngIf="modalMode === 'create'">
+        <label>Temporary Password <span class="required">*</span></label>
+        <input type="password" formControlName="password" placeholder="Minimum 8 characters" class="form-input" />
+        <span class="field-hint">Initial login password. User can change it after initial login.</span>
+      </div>
+
+      <div class="form-row two-col">
+        <!-- Role Selection -->
+        <div class="form-group">
+          <label>Role <span class="required">*</span></label>
+          <select formControlName="role" class="form-select">
+            <option value="org_admin">Org Admin (Tenant Scoped)</option>
+            <option value="super_admin">Super Admin (Global System)</option>
+          </select>
+          <span class="field-hint">
+            {{ userForm.get('role')?.value === 'super_admin' ? 'Can manage all organizations and platform settings' : 'Can manage passports and users in their organization' }}
+          </span>
+        </div>
+
+        <!-- Status Selection -->
+        <div class="form-group">
+          <label>Account Status <span class="required">*</span></label>
+          <select formControlName="status" class="form-select">
+            <option value="active">Active</option>
+            <option value="invited">Invited</option>
+            <option value="suspended" *ngIf="modalMode === 'edit'">Suspended</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Organization Selection (Shown/required for org_admin) -->
+      <div class="form-group" *ngIf="userForm.get('role')?.value === 'org_admin'">
+        <label>Assigned Organization <span class="required">*</span></label>
+        <select formControlName="organizationId" class="form-select">
+          <option value="" disabled>Select an Organization</option>
+          <option *ngFor="let org of organizations" [value]="org.id">{{ org.name }} ({{ org.tenant_id }})</option>
+        </select>
+        <span class="field-error" *ngIf="userForm.get('organizationId')?.touched && userForm.get('organizationId')?.hasError('required')">
+          Organization is required for Org Admins
+        </span>
+      </div>
+
+      <!-- Modal Footer Actions -->
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" (click)="closeModal()">Cancel</button>
+        <button type="submit" class="btn-submit" [disabled]="isSaving">
+          <mat-icon class="btn-icon" *ngIf="!isSaving">check</mat-icon>
+          <div class="spinner-sm" *ngIf="isSaving"></div>
+          <span>{{ modalMode === 'create' ? 'Create User' : 'Save Changes' }}</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ========================================================= -->
+<!-- 6. Delete Confirmation Dialog                             -->
+<!-- ========================================================= -->
+<div class="modal-backdrop" *ngIf="isDeleteModalOpen" (click)="cancelDelete()">
+  <div class="modal-card modal-sm" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-header-icon-wrap delete-icon-wrap">
+        <mat-icon>warning</mat-icon>
+      </div>
+      <div class="modal-header-text">
+        <h3>Delete User Account</h3>
+        <p>This action cannot be undone.</p>
+      </div>
+      <button type="button" class="btn-close" (click)="cancelDelete()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body-text" *ngIf="userToDelete">
+      <p>
+        Are you sure you want to permanently remove <strong>{{ userToDelete.first_name }} {{ userToDelete.last_name }}</strong> ({{ userToDelete.email }})?
+      </p>
+      <p class="warning-note">
+        Their access tokens will be immediately invalidated and they will lose access to all DPP modules.
+      </p>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn-cancel" (click)="cancelDelete()">Cancel</button>
+      <button type="button" class="btn-danger" [disabled]="isDeleting" (click)="confirmDelete()">
+        <mat-icon class="btn-icon" *ngIf="!isDeleting">delete</mat-icon>
+        <div class="spinner-sm" *ngIf="isDeleting"></div>
+        <span>{{ isDeleting ? 'Deleting...' : 'Confirm Delete' }}</span>
+      </button>
+    </div>
+  </div>
+</div>

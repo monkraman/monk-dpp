@@ -39,29 +39,46 @@ export class LoginComponent implements OnInit {
     }
 
     this.isLoading = true;
-    const { email } = this.loginForm.value;
+    const { email, password } = this.loginForm.value;
 
-    // Simulate / execute authentication
-    setTimeout(() => {
-      this.isLoading = false;
-      this.authService.setTokens('mock-access-token-monk', 'mock-refresh-token-monk');
-      this.authService.setCurrentUser({
-        id: 'usr-raman-001',
-        email: email || 'raman@monkspaces.com',
-        firstName: 'Raman',
-        lastName: 'Thakur',
-        role: 'admin',
-        organization: {
-          id: 'org-monkspaces',
-          name: 'Monk Spaces',
-          slug: 'monk-spaces',
-        },
-        createdAt: new Date().toISOString(),
-      });
-
-      this.toastService.show('Welcome back, Raman Thakur', 'success', 2500);
-      this.router.navigate(['/dashboard']);
-    }, 400);
+    this.authService.login(email, password).subscribe({
+      next: (res: any) => {
+        this.isLoading = false;
+        const user = res.user || this.authService.getCurrentUser();
+        const userName = user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'User';
+        const orgName = user?.organization?.name || 'Your Organization';
+        this.toastService.show(`Welcome back, ${userName} (${orgName})`, 'success', 3000);
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        if (err.status === 401) {
+          this.toastService.show('Invalid email or password. Please try again.', 'error', 4000);
+        } else if (err.status === 0) {
+          // Backend is offline or unreachable - activate demo mode for local UI testing
+          this.toastService.show('Backend is offline. Starting local demo session...', 'info', 3000);
+          this.authService.setTokens('mock-jwt-token-monkspaces-2026', 'mock-refresh-token-monkspaces');
+          this.authService.setCurrentUser({
+            id: '6e3b8e9f-e850-4308-bd6d-83708b84c9ba',
+            email: email || 'admin@monkspaces.com',
+            firstName: 'Raman',
+            lastName: 'Thakur',
+            role: 'admin',
+            organizationId: 'c6c5485c-9e10-4bae-b298-72ec331daf91',
+            organization: {
+              id: 'c6c5485c-9e10-4bae-b298-72ec331daf91',
+              name: 'Monkspaces Technologies',
+              slug: 'monkspaces-technologies',
+            },
+            createdAt: new Date().toISOString(),
+          });
+          this.router.navigate(['/dashboard']);
+        } else {
+          const message = err.error?.message || 'Login failed. Please verify credentials.';
+          this.toastService.show(message, 'error', 4000);
+        }
+      },
+    });
   }
 
   onSocialLogin(provider: string): void {

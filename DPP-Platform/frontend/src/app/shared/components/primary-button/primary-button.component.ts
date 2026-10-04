@@ -3,9 +3,13 @@
  * Green for important actions, DPP-specific
  */
 import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'ms-primary-button',
+  standalone: true,
+  imports: [CommonModule, MatIconModule],
   template: `
     <button 
       class="btn btn-primary"

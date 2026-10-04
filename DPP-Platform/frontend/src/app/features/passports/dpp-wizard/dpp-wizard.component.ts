@@ -16,10 +16,10 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 
-import { Dpp, CreateDppDto } from '../../models/dpp.models';
+import { Dpp, CreateDppDto } from '../../../models/dpp.models';
 import { ActivatedRoute, Router } from '@angular/router';
-import { DppService } from '../services/dpp.service';
-import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
+import { DppService } from '../../../core/dpp.service';
+import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 
 interface Step {
   number: number;
@@ -158,7 +158,7 @@ interface Step {
               
               <div class="info-box">
                 <mat-icon>info</mat-icon>
-                <p>GS1 Digital Link will be generated automatically: <code>https://dpp.himsols.online/id/{GTIN}/{Serial}</code></p>
+                <p>GS1 Digital Link will be generated automatically: <code>https://dpp.himsols.online/id/&#123;GTIN&#125;/&#123;Serial&#125;</code></p>
               </div>
             </form>
           </div>

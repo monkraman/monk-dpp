@@ -10,6 +10,13 @@ export class OrganizationsService {
     private readonly orgRepository: Repository<Organization>,
   ) {}
 
+  async findAll(): Promise<Organization[]> {
+    return this.orgRepository.find({
+      relations: ['users'],
+      order: { created_at: 'DESC' },
+    });
+  }
+
   async findOne(id: string): Promise<Organization | null> {
     return this.orgRepository.findOne({
       where: { id },

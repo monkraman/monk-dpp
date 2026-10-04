@@ -39,21 +39,31 @@ export class ProductsController {
   @Put(':id')
   @Roles('admin', 'member')
   @ApiOperation({ summary: 'Update product' })
-  async update(@Param('id', ParseUUIDPipe) id: string, @Body() updateProductDto: Record<string, unknown>, @CurrentUser() user: { organizationId: string }) {
-    return this.productsService.update(id, updateProductDto, user.organizationId);
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateProductDto: Record<string, unknown>,
+    @CurrentUser() user: { organizationId: string; sub: string },
+  ) {
+    return this.productsService.update(id, updateProductDto, user.organizationId, user.sub);
   }
 
   @Delete(':id')
   @Roles('admin')
   @ApiOperation({ summary: 'Delete (archive) product' })
-  async remove(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: { organizationId: string }) {
-    return this.productsService.remove(id, user.organizationId);
+  async remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: { organizationId: string; sub: string },
+  ) {
+    return this.productsService.remove(id, user.organizationId, user.sub);
   }
 
   @Post(':id/publish')
   @Roles('admin', 'member')
   @ApiOperation({ summary: 'Publish product and generate QR code' })
-  async publish(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: { organizationId: string }) {
-    return this.productsService.publish(id, user.organizationId);
+  async publish(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: { organizationId: string; sub: string },
+  ) {
+    return this.productsService.publish(id, user.organizationId, user.sub);
   }
 }

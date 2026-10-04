@@ -24,9 +24,17 @@ export class UsersService {
     });
   }
 
+  async findAll(): Promise<User[]> {
+    return this.userRepository.find({
+      relations: ['organization'],
+      order: { created_at: 'DESC' },
+    });
+  }
+
   async findByOrganization(orgId: string): Promise<User[]> {
     return this.userRepository.find({
       where: { organization_id: orgId },
+      relations: ['organization'],
       order: { created_at: 'DESC' },
     });
   }
