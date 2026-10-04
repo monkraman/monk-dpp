@@ -69,8 +69,11 @@ A single QR code on a physical product must resolve dynamically based on the vie
 ## 4. Product Scope & Phasing
 
 ### Phase 1: MVP (Current Release)
-- **Multi-Tenant Foundation**: Organization registration, user management, and Role-Based Access Control (RBAC).
-- **Battery Schema Engine**: Full 71-field entry covering Annex VI (Public), Annex XIII (Professional), and Authority requirements.
+- **Multi-Tenant Foundation & RBAC**: Organization registration, user management (`/user-management`), and role-based permissions.
+- **Company Management ("To & From" Partners)**: Dedicated directory (`/company-management`) for component suppliers ("From"), internal manufacturing plants, client recipients ("To"), and circular recyclers.
+- **Product Management Master Catalog**: Visual catalog (`/product-management`) featuring real product photography, technical specs, mass/volume, chemical composition, and SKU/GTIN identifiers.
+- **Custom Monk Spaces Navigation**: Bespoke executive UI (*Operations Hub, Digital Passports, Company Management, Product Management, User Management*) completely distinct from competitor designs.
+- **Chain of Custody Provenance (Linking)**: Linking sub-tier component passports into parent product passports.
 - **Dynamic GS1 QR Code Generation**: Instant SVG/PNG QR generation encoding GS1 Digital Link standard URI (`https://domain.com/01/{GTIN}/21/{SERIAL}`).
 - **3-Tier Data Separation**: Tiered JSONB storage preventing unauthorized data leakage.
 - **Immutable Audit Logging**: Automatic record of every creation, edit, publication, and deletion.

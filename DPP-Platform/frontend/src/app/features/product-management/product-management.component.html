@@ -1,0 +1,332 @@
+<div class="product-management-viewport">
+  <!-- 1. Executive Context Header -->
+  <header class="executive-header">
+    <div class="header-main">
+      <div class="greeting-badge-row">
+        <span class="platform-badge">
+          <mat-icon class="badge-icon">inventory_2</mat-icon>
+          Product Master & Visual Assets
+        </span>
+        <span class="tenant-badge" *ngIf="currentUser?.organization?.name">
+          <mat-icon class="tenant-icon">verified</mat-icon>
+          {{ currentUser?.organization?.name }}
+        </span>
+      </div>
+      <h1 class="executive-title">Product Management & Master Catalog</h1>
+      <p class="executive-subtitle">
+        Maintain product records, photographic assets, technical specifications, and component bills of materials (BOM) for Digital Product Passport creation.
+      </p>
+    </div>
+
+    <!-- Action Toolbar -->
+    <div class="header-actions">
+      <button type="button" class="btn-secondary" (click)="loadProducts()" [disabled]="isLoading" title="Refresh catalog">
+        <mat-icon class="btn-icon" [class.spin]="isLoading">refresh</mat-icon>
+        <span>Refresh</span>
+      </button>
+
+      <button type="button" class="btn-primary" (click)="openCreateModal()">
+        <mat-icon class="btn-icon">add_photo_alternate</mat-icon>
+        <span>Add Product Record</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. Governance KPI Metrics Grid -->
+  <section class="metrics-grid">
+    <app-stat-card
+      label="Total Catalog SKUs"
+      [value]="products.length"
+      unit="SKUs"
+      change="Master Catalog"
+      trend="positive"
+      detail="Active product records"
+      icon="category"
+    ></app-stat-card>
+
+    <app-stat-card
+      label="Packaging & Polymers"
+      [value]="categoryTabs[1].count || 0"
+      unit="Containers"
+      change="Consumer Sector"
+      trend="positive"
+      detail="Bottles, caps, and boxes"
+      icon="takeout_dining"
+    ></app-stat-card>
+
+    <app-stat-card
+      label="Energy & Batteries"
+      [value]="categoryTabs[2].count || 0"
+      unit="Battery Packs"
+      change="ESPR Mandate"
+      trend="neutral"
+      detail="EV & Industrial cells"
+      icon="battery_charging_full"
+    ></app-stat-card>
+
+    <app-stat-card
+      label="Passports Published"
+      [value]="4"
+      unit="Live DPPs"
+      change="Chain of Custody"
+      trend="positive"
+      detail="Verified with GS1 QR codes"
+      icon="qr_code_2"
+    ></app-stat-card>
+  </section>
+
+  <!-- 3. Filter Controls & Search -->
+  <section class="controls-card">
+    <div class="filter-tabs-wrapper">
+      <app-filter-tabs
+        [tabs]="categoryTabs"
+        [activeTab]="activeCategoryFilter"
+        (tabChange)="onCategoryFilterChange($event)"
+      ></app-filter-tabs>
+    </div>
+
+    <div class="search-filter-row">
+      <div class="search-input-wrapper">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search by product name, SKU, GTIN, chemical spec, brand, country..."
+          [(ngModel)]="searchQuery"
+          (input)="onSearchChange()"
+        />
+        <button
+          *ngIf="searchQuery"
+          class="clear-search-btn"
+          (click)="searchQuery = ''; onSearchChange()"
+          title="Clear search"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="result-counter">
+        Showing <strong>{{ filteredProducts.length }}</strong> of {{ products.length }} catalog items
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Products Table / Visual List -->
+  <section class="table-card">
+    <div *ngIf="isLoading" class="loading-state">
+      <mat-spinner diameter="44"></mat-spinner>
+      <p>Loading master product inventory...</p>
+    </div>
+
+    <div *ngIf="!isLoading && filteredProducts.length === 0" class="empty-state">
+      <div class="empty-icon-wrap">
+        <mat-icon>inventory</mat-icon>
+      </div>
+      <h3>No products found</h3>
+      <p>Try clearing your filters or create a new product specification.</p>
+      <button class="btn-primary" (click)="openCreateModal()">
+        <mat-icon class="btn-icon">add</mat-icon>
+        <span>Add Product Record</span>
+      </button>
+    </div>
+
+    <div class="table-container" *ngIf="!isLoading && filteredProducts.length > 0">
+      <table class="dpp-table">
+        <thead>
+          <tr>
+            <th class="col-product">Product & Visual Asset</th>
+            <th class="col-type">Category & Type</th>
+            <th class="col-identifiers">GTIN / SKU Identifiers</th>
+            <th class="col-specs">Mass & Material Specs</th>
+            <th class="col-dpp">Passport Linkage</th>
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let product of filteredProducts" class="table-row">
+            <!-- Product Image & Name -->
+            <td class="col-product">
+              <div class="product-cell">
+                <div class="product-thumb-container">
+                  <img
+                    [src]="product.imageUrl"
+                    [alt]="product.name"
+                    class="product-thumb"
+                    onerror="this.src='https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300&auto=format&fit=crop&q=80'"
+                  />
+                </div>
+                <div class="product-meta">
+                  <span class="product-name">{{ product.name }}</span>
+                  <span class="product-brand">{{ product.brand }} &bull; {{ product.origin }}</span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Category & Type -->
+            <td class="col-type">
+              <div class="type-cell">
+                <span class="category-pill">{{ product.category }}</span>
+                <span class="type-subtext" [ngClass]="product.type.toLowerCase()">
+                  {{ product.type }} Item
+                </span>
+              </div>
+            </td>
+
+            <!-- Identifiers -->
+            <td class="col-identifiers">
+              <div class="id-meta">
+                <span class="sku-tag">SKU: {{ product.sku }}</span>
+                <span class="gtin-tag">GTIN: {{ product.gtin }}</span>
+              </div>
+            </td>
+
+            <!-- Mass & Specs -->
+            <td class="col-specs">
+              <div class="specs-meta">
+                <span class="mass-highlight">{{ product.massOrVolume }}</span>
+                <span class="specs-text" [title]="product.specsSummary">{{ product.specsSummary }}</span>
+              </div>
+            </td>
+
+            <!-- DPP Passport Status -->
+            <td class="col-dpp">
+              <div class="passport-status-cell">
+                <span class="dpp-badge published" *ngIf="product.status === 'published'">
+                  <mat-icon class="badge-icon">check_circle</mat-icon>
+                  <span>{{ product.dppId || 'Active DPP' }}</span>
+                </span>
+                <span class="dpp-badge draft" *ngIf="product.status === 'draft'">
+                  <mat-icon class="badge-icon">edit_note</mat-icon>
+                  <span>Draft DPP</span>
+                </span>
+                <span class="dpp-badge unlinked" *ngIf="product.status === 'unlinked'">
+                  <mat-icon class="badge-icon">link_off</mat-icon>
+                  <span>No Passport</span>
+                </span>
+              </div>
+            </td>
+
+            <!-- Actions -->
+            <td class="col-actions">
+              <div class="action-buttons">
+                <button
+                  type="button"
+                  class="btn-action-primary"
+                  routerLink="/dashboard"
+                  title="Generate or view DPP"
+                >
+                  <mat-icon>qr_code</mat-icon>
+                  <span>Passports</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 5. Add Product Record Modal -->
+  <div class="modal-backdrop" *ngIf="isModalOpen" (click)="closeModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title-row">
+          <div class="modal-icon-wrapper">
+            <mat-icon>add_photo_alternate</mat-icon>
+          </div>
+          <div>
+            <h2 class="modal-title">New Product Master Record</h2>
+            <p class="modal-subtitle">Add technical specs, identifiers, and photos for passport generation</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" (click)="closeModal()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <form [formGroup]="productForm" (ngSubmit)="submitProduct()" class="modal-body">
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label class="form-label">Product Name / Model <span class="required">*</span></label>
+            <input type="text" class="form-control" formControlName="name" placeholder="e.g. Titan-EV 800 Pack or Dettol 250ml" />
+            <div class="form-error" *ngIf="productForm.get('name')?.touched && productForm.get('name')?.invalid">
+              Product name is required.
+            </div>
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label">Brand / Manufacturer <span class="required">*</span></label>
+            <input type="text" class="form-control" formControlName="brand" placeholder="e.g. Monkspaces / Reckitt" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label class="form-label">Sector Category <span class="required">*</span></label>
+            <select class="form-control" formControlName="categoryKey">
+              <option value="PACKAGING">Polymers & Packaging</option>
+              <option value="BATTERIES">Batteries & Energy Storage</option>
+              <option value="CHEMICALS">Chemicals & Minerals</option>
+              <option value="TEXTILES">Textiles & Fiber</option>
+            </select>
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label">Item Classification <span class="required">*</span></label>
+            <select class="form-control" formControlName="type">
+              <option value="Custom">Custom SKU / Finished Product</option>
+              <option value="Component">Sub-tier Component</option>
+              <option value="Material">Raw Material Feedstock</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label class="form-label">SKU Identifier <span class="required">*</span></label>
+            <input type="text" class="form-control" formControlName="sku" placeholder="SKU-XXXX" />
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label">GS1 GTIN Code <span class="required">*</span></label>
+            <input type="text" class="form-control" formControlName="gtin" placeholder="08901396XXXXXX" />
+            <div class="form-error" *ngIf="productForm.get('gtin')?.touched && productForm.get('gtin')?.invalid">
+              GTIN must be 8-14 numeric digits.
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label class="form-label">Mass / Weight / Volume <span class="required">*</span></label>
+            <input type="text" class="form-control" formControlName="massOrVolume" placeholder="e.g. 0.25 L or 450 kg" />
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label">Country of Origin <span class="required">*</span></label>
+            <input type="text" class="form-control" formControlName="origin" placeholder="e.g. India / Germany" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Material & Composition Summary <span class="required">*</span></label>
+          <input type="text" class="form-control" formControlName="specsSummary" placeholder="e.g. Chloroxylenol 4.8% • Recycled PET 35% • NMC 811" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Product Photo URL</label>
+          <input type="url" class="form-control" formControlName="imageUrl" placeholder="https://..." />
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" (click)="closeModal()">Cancel</button>
+          <button type="submit" class="btn-primary" [disabled]="isSaving || productForm.invalid">
+            <mat-spinner diameter="18" *ngIf="isSaving"></mat-spinner>
+            <span *ngIf="!isSaving">Save Product Record</span>
+            <span *ngIf="isSaving">Saving...</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

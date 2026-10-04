@@ -12,19 +12,40 @@ const routes: Routes = [
     path: 'register',
     loadChildren: () => import('./features/auth/register/register.module').then((m) => m.RegisterModule),
   },
+  // Operations Hub / Dashboard
   {
     path: 'dashboard',
     loadChildren: () => import('./features/dashboard/dashboard.module').then((m) => m.DashboardModule),
     canActivate: [AuthGuard],
   },
-  // Clean routes matching screenshot navigation
   { path: 'product-passports', redirectTo: 'dashboard' },
+
+  // 1. Company Management (To & From Companies, Supply Chain Directory)
   {
-    path: 'access-control',
+    path: 'company-management',
+    loadChildren: () => import('./features/company-management/company-management.module').then((m) => m.CompanyManagementModule),
+    canActivate: [AuthGuard],
+  },
+  { path: 'companies', redirectTo: 'company-management' },
+
+  // 2. Product Management (Master Catalog with photos, specs, and materials)
+  {
+    path: 'product-management',
+    loadChildren: () => import('./features/product-management/product-management.module').then((m) => m.ProductManagementModule),
+    canActivate: [AuthGuard],
+  },
+  { path: 'product-library', redirectTo: 'product-management' },
+  { path: 'products', redirectTo: 'product-management' },
+
+  // 3. User Management (Team Members & RBAC)
+  {
+    path: 'user-management',
     loadChildren: () => import('./features/access-control/access-control.module').then((m) => m.AccessControlModule),
     canActivate: [AuthGuard],
   },
-  { path: 'product-library', redirectTo: 'dashboard' },
+  { path: 'access-control', redirectTo: 'user-management' },
+  { path: 'users', redirectTo: 'user-management' },
+
   { path: 'notifications', redirectTo: 'dashboard' },
   { path: 'settings', redirectTo: 'dashboard' },
   { path: '**', redirectTo: 'login' },

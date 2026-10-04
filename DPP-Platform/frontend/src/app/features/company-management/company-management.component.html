@@ -1,0 +1,359 @@
+<div class="company-management-viewport">
+  <!-- 1. Executive Context Header -->
+  <header class="executive-header">
+    <div class="header-main">
+      <div class="greeting-badge-row">
+        <span class="platform-badge">
+          <mat-icon class="badge-icon">domain</mat-icon>
+          Supply Chain Provenance
+        </span>
+        <span class="tenant-badge" *ngIf="currentUser?.organization?.name">
+          <mat-icon class="tenant-icon">verified</mat-icon>
+          {{ currentUser?.organization?.name }}
+        </span>
+      </div>
+      <h1 class="executive-title">Company & Partner Directory</h1>
+      <p class="executive-subtitle">
+        Manage supplier organizations ("From"), internal manufacturing entities, and recipient clients ("To") across the digital passport chain of custody.
+      </p>
+    </div>
+
+    <!-- Action Toolbar -->
+    <div class="header-actions">
+      <button type="button" class="btn-secondary" (click)="loadCompanies()" [disabled]="isLoading" title="Refresh directory">
+        <mat-icon class="btn-icon" [class.spin]="isLoading">refresh</mat-icon>
+        <span>Refresh</span>
+      </button>
+
+      <button type="button" class="btn-primary" (click)="openCreateModal()">
+        <mat-icon class="btn-icon">add_business</mat-icon>
+        <span>Register Partner Company</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. Governance KPI Metrics Grid -->
+  <section class="metrics-grid">
+    <app-stat-card
+      label="Total Companies"
+      [value]="companies.length"
+      unit="Entities"
+      change="Active Network"
+      trend="positive"
+      detail="Registered in supply ecosystem"
+      icon="corporate_fare"
+    ></app-stat-card>
+
+    <app-stat-card
+      label="Suppliers ('From')"
+      [value]="roleTabs[1].count || 0"
+      unit="Partners"
+      change="Material Feed"
+      trend="neutral"
+      detail="Issuing component certificates"
+      icon="input"
+    ></app-stat-card>
+
+    <app-stat-card
+      label="Recipients ('To')"
+      [value]="roleTabs[3].count || 0"
+      unit="Clients"
+      change="Direct Customers"
+      trend="positive"
+      detail="Receiving finished DPP records"
+      icon="output"
+    ></app-stat-card>
+
+    <app-stat-card
+      label="Circular Recyclers"
+      [value]="roleTabs[4].count || 0"
+      unit="Recyclers"
+      change="Closed Loop"
+      trend="positive"
+      detail="End-of-life takeback partners"
+      icon="recycling"
+    ></app-stat-card>
+  </section>
+
+  <!-- 3. Filter Controls & Search -->
+  <section class="controls-card">
+    <div class="filter-tabs-wrapper">
+      <app-filter-tabs
+        [tabs]="roleTabs"
+        [activeTab]="activeRoleFilter"
+        (tabChange)="onRoleFilterChange($event)"
+      ></app-filter-tabs>
+    </div>
+
+    <div class="search-filter-row">
+      <div class="search-input-wrapper">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search by company name, sector, contact, registration ID, country..."
+          [(ngModel)]="searchQuery"
+          (input)="onSearchChange()"
+        />
+        <button
+          *ngIf="searchQuery"
+          class="clear-search-btn"
+          (click)="searchQuery = ''; onSearchChange()"
+          title="Clear search"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="result-counter">
+        Showing <strong>{{ filteredCompanies.length }}</strong> of {{ companies.length }} organizations
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Company Directory Table -->
+  <section class="table-card">
+    <div *ngIf="isLoading" class="loading-state">
+      <mat-spinner diameter="44"></mat-spinner>
+      <p>Synchronizing supply chain directory...</p>
+    </div>
+
+    <div *ngIf="!isLoading && filteredCompanies.length === 0" class="empty-state">
+      <div class="empty-icon-wrap">
+        <mat-icon>domain_disabled</mat-icon>
+      </div>
+      <h3>No partner companies found</h3>
+      <p>Try adjusting your search criteria or register a new company.</p>
+      <button class="btn-primary" (click)="openCreateModal()">
+        <mat-icon class="btn-icon">add</mat-icon>
+        <span>Register Company</span>
+      </button>
+    </div>
+
+    <div class="table-container" *ngIf="!isLoading && filteredCompanies.length > 0">
+      <table class="dpp-table">
+        <thead>
+          <tr>
+            <th class="col-company">Company & Country</th>
+            <th class="col-role">Chain of Custody Role</th>
+            <th class="col-sector">Sector / Industry</th>
+            <th class="col-contact">Contact Person</th>
+            <th class="col-passports">Linked Passports</th>
+            <th class="col-status">Status</th>
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let company of filteredCompanies" class="table-row">
+            <!-- Company & Country -->
+            <td class="col-company">
+              <div class="company-cell">
+                <div class="country-flag-bubble" [title]="company.country">
+                  {{ company.countryFlag || '🌐' }}
+                </div>
+                <div class="company-meta">
+                  <span class="company-name">{{ company.name }}</span>
+                  <span class="company-reg">{{ company.registrationNumber }} &bull; {{ company.country }}</span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Role Badge -->
+            <td class="col-role">
+              <span class="role-pill" [ngClass]="getRoleBadgeClass(company.role)">
+                <mat-icon class="pill-icon" *ngIf="company.role === 'supplier'">input</mat-icon>
+                <mat-icon class="pill-icon" *ngIf="company.role === 'internal'">factory</mat-icon>
+                <mat-icon class="pill-icon" *ngIf="company.role === 'recipient'">output</mat-icon>
+                <mat-icon class="pill-icon" *ngIf="company.role === 'recycler'">recycling</mat-icon>
+                {{ company.roleLabel }}
+              </span>
+            </td>
+
+            <!-- Sector -->
+            <td class="col-sector">
+              <span class="sector-tag">{{ company.sector }}</span>
+            </td>
+
+            <!-- Contact -->
+            <td class="col-contact">
+              <div class="contact-meta">
+                <span class="contact-name">{{ company.contactPerson }}</span>
+                <a [href]="'mailto:' + company.email" class="contact-email">{{ company.email }}</a>
+              </div>
+            </td>
+
+            <!-- Linked Passports -->
+            <td class="col-passports">
+              <div class="passport-count-pill" [class.has-passports]="company.activePassportsCount > 0">
+                <mat-icon class="count-icon">layers</mat-icon>
+                <span>{{ company.activePassportsCount }} Passports</span>
+              </div>
+            </td>
+
+            <!-- Status -->
+            <td class="col-status">
+              <span class="status-chip active" *ngIf="company.verificationStatus === 'verified'">
+                <mat-icon class="status-dot">check_circle</mat-icon>
+                Verified Partner
+              </span>
+              <span class="status-chip active" *ngIf="company.verificationStatus === 'active'">
+                <mat-icon class="status-dot">radio_button_checked</mat-icon>
+                Active
+              </span>
+            </td>
+
+            <!-- Actions -->
+            <td class="col-actions">
+              <div class="action-buttons">
+                <button
+                  type="button"
+                  class="action-btn delete-btn"
+                  (click)="openDeleteModal(company)"
+                  *ngIf="company.role !== 'internal'"
+                  title="Remove from directory"
+                >
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 5. Register Partner Company Modal -->
+  <div class="modal-backdrop" *ngIf="isModalOpen" (click)="closeModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title-row">
+          <div class="modal-icon-wrapper">
+            <mat-icon>add_business</mat-icon>
+          </div>
+          <div>
+            <h2 class="modal-title">Register Partner Company</h2>
+            <p class="modal-subtitle">Add a supplier, client recipient, or circular partner to your supply network</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" (click)="closeModal()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <form [formGroup]="companyForm" (ngSubmit)="submitCompany()" class="modal-body">
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label class="form-label">Company Trade Name <span class="required">*</span></label>
+            <input type="text" class="form-control" formControlName="name" placeholder="e.g. Cascarine Polymers Pvt. Ltd." />
+            <div class="form-error" *ngIf="companyForm.get('name')?.touched && companyForm.get('name')?.invalid">
+              Company name is required.
+            </div>
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label">Supply Chain Role <span class="required">*</span></label>
+            <select class="form-control" formControlName="role">
+              <option value="supplier">Component Supplier (From)</option>
+              <option value="recipient">Client Recipient (To)</option>
+              <option value="recycler">Circular Recycler</option>
+              <option value="internal">Internal / Subsidiary</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label class="form-label">Industry Sector <span class="required">*</span></label>
+            <select class="form-control" formControlName="sector">
+              <option value="Polymers & Packaging">Polymers & Packaging</option>
+              <option value="Batteries & Energy Storage">Batteries & Energy Storage</option>
+              <option value="Specialty Chemicals & Electrolytes">Specialty Chemicals & Electrolytes</option>
+              <option value="Mining & Metallurgical Minerals">Mining & Metallurgical Minerals</option>
+              <option value="Industrial Infrastructure & Steel">Industrial Infrastructure & Steel</option>
+              <option value="Consumer Healthcare & Goods">Consumer Healthcare & Goods</option>
+              <option value="Metals & Battery Recycling">Metals & Battery Recycling</option>
+            </select>
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label">Country <span class="required">*</span></label>
+            <select class="form-control" formControlName="country">
+              <option value="India">🇮🇳 India</option>
+              <option value="Germany">🇩🇪 Germany</option>
+              <option value="Netherlands">🇳🇱 Netherlands</option>
+              <option value="UK">🇬🇧 United Kingdom</option>
+              <option value="USA">🇺🇸 United States</option>
+              <option value="France">🇫🇷 France</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label class="form-label">Registration / Tax ID <span class="required">*</span></label>
+            <input type="text" class="form-control" formControlName="registrationNumber" placeholder="CIN / VAT / KVK / GSTIN" />
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label">Business Email <span class="required">*</span></label>
+            <input type="email" class="form-control" formControlName="email" placeholder="compliance@company.com" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label class="form-label">Primary Contact Person <span class="required">*</span></label>
+            <input type="text" class="form-control" formControlName="contactPerson" placeholder="Full name of representative" />
+          </div>
+
+          <div class="form-group flex-1">
+            <label class="form-label">Contact Phone</label>
+            <input type="text" class="form-control" formControlName="contactPhone" placeholder="+91 / +49 phone number" />
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" (click)="closeModal()">Cancel</button>
+          <button type="submit" class="btn-primary" [disabled]="isSaving || companyForm.invalid">
+            <mat-spinner diameter="18" *ngIf="isSaving"></mat-spinner>
+            <span *ngIf="!isSaving">Register Company</span>
+            <span *ngIf="isSaving">Saving...</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 6. Delete Confirmation Modal -->
+  <div class="modal-backdrop" *ngIf="isDeleteModalOpen" (click)="closeDeleteModal()">
+    <div class="modal-dialog modal-sm" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title-row">
+          <div class="modal-icon-wrapper danger">
+            <mat-icon>warning</mat-icon>
+          </div>
+          <div>
+            <h2 class="modal-title">Remove Partner Company</h2>
+            <p class="modal-subtitle">Are you sure you want to remove <strong>{{ companyToDelete?.name }}</strong>?</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" (click)="closeDeleteModal()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p class="warning-text">
+          Existing historical passports referencing this company will remain intact in compliance audit logs.
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="closeDeleteModal()">Cancel</button>
+        <button type="button" class="btn-danger" (click)="confirmDelete()">
+          <span>Remove Company</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

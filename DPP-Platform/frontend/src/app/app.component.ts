@@ -26,24 +26,29 @@ import { ThemeService } from './core/services/theme.service';
           </div>
 
           <nav class="nav-menu">
-            <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
-              <mat-icon class="nav-icon">home</mat-icon>
-              <span class="nav-text">Dashboard</span>
+            <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" title="Operations & Metrics Hub">
+              <mat-icon class="nav-icon">insights</mat-icon>
+              <span class="nav-text">Operations Hub</span>
             </a>
 
-            <a routerLink="/product-passports" routerLinkActive="active" class="nav-item">
-              <mat-icon class="nav-icon">layers</mat-icon>
-              <span class="nav-text">Product Passports</span>
+            <a routerLink="/product-passports" routerLinkActive="active" class="nav-item" title="Chain of Custody Digital Passports">
+              <mat-icon class="nav-icon">qr_code_2</mat-icon>
+              <span class="nav-text">Digital Passports</span>
             </a>
 
-            <a routerLink="/access-control" routerLinkActive="active" class="nav-item">
-              <mat-icon class="nav-icon">verified_user</mat-icon>
-              <span class="nav-text">Access Control</span>
+            <a routerLink="/company-management" routerLinkActive="active" class="nav-item" title="To & From Partner Companies">
+              <mat-icon class="nav-icon">domain</mat-icon>
+              <span class="nav-text">Company Management</span>
             </a>
 
-            <a routerLink="/product-library" routerLinkActive="active" class="nav-item">
-              <mat-icon class="nav-icon">widgets</mat-icon>
-              <span class="nav-text">Product Library</span>
+            <a routerLink="/product-management" routerLinkActive="active" class="nav-item" title="Master Product Records & Visual Assets">
+              <mat-icon class="nav-icon">inventory_2</mat-icon>
+              <span class="nav-text">Product Management</span>
+            </a>
+
+            <a routerLink="/user-management" routerLinkActive="active" class="nav-item" title="User Roles & Team Access">
+              <mat-icon class="nav-icon">manage_accounts</mat-icon>
+              <span class="nav-text">User Management</span>
             </a>
           </nav>
         </div>
