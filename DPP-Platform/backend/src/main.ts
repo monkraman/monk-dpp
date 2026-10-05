@@ -22,8 +22,22 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   // Enable CORS
+  const frontendUrl = process.env.FRONTEND_URL;
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:4200',
+    origin: (origin, callback) => {
+      if (
+        !origin ||
+        !frontendUrl ||
+        origin === frontendUrl ||
+        origin.endsWith('.vercel.app') ||
+        origin.endsWith('.onrender.com') ||
+        origin.includes('localhost')
+      ) {
+        callback(null, true);
+      } else {
+        callback(null, true);
+      }
+    },
     credentials: true,
   });
 
