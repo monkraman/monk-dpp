@@ -15,6 +15,7 @@ interface EnvConfig {
   S3_ACCESS_KEY: string;
   S3_SECRET_KEY: string;
   S3_ENDPOINT: string;
+  S3_PUBLIC_BASE_URL?: string;
   CLOUDFLARE_ZONE: string;
   AUDIT_ENABLED: boolean;
 }
@@ -50,13 +51,14 @@ export class ConfigService {
       S3_ACCESS_KEY: process.env.S3_ACCESS_KEY || '',
       S3_SECRET_KEY: process.env.S3_SECRET_KEY || '',
       S3_ENDPOINT: process.env.S3_ENDPOINT || '',
+      S3_PUBLIC_BASE_URL: process.env.S3_PUBLIC_BASE_URL || '',
       CLOUDFLARE_ZONE: process.env.CLOUDFLARE_ZONE || '',
       AUDIT_ENABLED: process.env.AUDIT_ENABLED !== 'false',
     };
   }
 
-  get(key: keyof EnvConfig): string | number | boolean {
-    return this.config[key];
+  get<T = any>(key: string): T {
+    return ((this.config as any)[key] ?? (process.env as any)[key]) as T;
   }
 
   getPort(): number {
