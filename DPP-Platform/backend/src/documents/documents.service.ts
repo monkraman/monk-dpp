@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { ConfigService } from '../config/configuration.service';
 import { PresignedUploadDto, ConfirmUploadDto } from './documents.dto';
 
 export interface MulterFile {
