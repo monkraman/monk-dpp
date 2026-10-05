@@ -74,7 +74,7 @@ backend/
 
 ```bash
 cd backend
-npm install
+npm ci
 ```
 
 ### 2. Configure environment
