@@ -314,8 +314,14 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label">Product Photo URL</label>
-          <input type="url" class="form-control" formControlName="imageUrl" placeholder="https://..." />
+          <label class="form-label">Product Visual Asset / Photograph</label>
+          <app-file-upload
+            mode="image"
+            label="Upload Product Image"
+            [existingUrl]="productForm.get('imageUrl')?.value"
+            (fileUploaded)="onProductImageUploaded($event)"
+            (fileRemoved)="onProductImageRemoved()"
+          ></app-file-upload>
         </div>
 
         <div class="modal-footer">

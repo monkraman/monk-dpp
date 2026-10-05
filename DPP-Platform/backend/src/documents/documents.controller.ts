@@ -59,6 +59,28 @@ export class DocumentsController {
     return this.documentsService.getDownloadUrl(id, user.organizationId);
   }
 
+  @Post('presigned-upload')
+  @Roles('admin', 'member')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Generate presigned S3/R2 upload URL' })
+  async presignedUpload(
+    @Body() dto: any,
+    @CurrentUser() user: { organizationId: string; sub: string },
+  ) {
+    return this.documentsService.generatePresignedUploadUrl(dto, user.organizationId, user.sub);
+  }
+
+  @Post('confirm')
+  @Roles('admin', 'member')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Confirm completed upload and record document metadata' })
+  async confirmUpload(
+    @Body() dto: any,
+    @CurrentUser() user: { organizationId: string; sub: string },
+  ) {
+    return this.documentsService.confirmUpload(dto, user.organizationId, user.sub);
+  }
+
   @Post('upload')
   @Roles('admin', 'member')
   @HttpCode(HttpStatus.CREATED)

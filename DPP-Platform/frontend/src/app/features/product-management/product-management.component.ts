@@ -371,6 +371,15 @@ export class ProductManagementComponent implements OnInit {
       });
   }
 
+  onProductImageUploaded(event: { url: string; fileKey: string }): void {
+    this.productForm.patchValue({ imageUrl: event.url });
+    this.toastService.show('Product photograph attached successfully!', 'success', 2500);
+  }
+
+  onProductImageRemoved(): void {
+    this.productForm.patchValue({ imageUrl: '' });
+  }
+
   private getCategoryLabel(key: string): string {
     switch (key) {
       case 'BATTERIES':

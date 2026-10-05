@@ -13,6 +13,7 @@ import { ProgressBarComponent } from './components/progress-bar/progress-bar.com
 import { PageHeaderComponent } from './components/page-header/page-header.component';
 import { EmptyStateComponent } from './components/empty-state/empty-state.component';
 import { PrimaryButtonComponent } from './components/primary-button/primary-button.component';
+import { FileUploadComponent } from './components/file-upload/file-upload.component';
 
 const SHARED_COMPONENTS = [
   LoadingSpinnerComponent,
@@ -24,6 +25,7 @@ const SHARED_COMPONENTS = [
   PageHeaderComponent,
   EmptyStateComponent,
   PrimaryButtonComponent,
+  FileUploadComponent,
 ];
 
 @NgModule({
