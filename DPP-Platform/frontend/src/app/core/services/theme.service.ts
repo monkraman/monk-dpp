@@ -48,16 +48,6 @@ export class ThemeService {
     root.style.setProperty('--brand-accent', c.accent);
     root.style.setProperty('--brand-accent-hover', c.accentHover);
     root.style.setProperty('--brand-accent-glow', c.accentGlow);
-    root.style.setProperty('--bg-page', c.bgPage);
-    root.style.setProperty('--bg-surface', c.bgSurface);
-    root.style.setProperty('--bg-sidebar', c.bgSidebar);
-    root.style.setProperty('--bg-card', c.bgCard);
-    root.style.setProperty('--bg-card-hover', c.bgCardHover);
-    root.style.setProperty('--text-primary', c.textPrimary);
-    root.style.setProperty('--text-secondary', c.textSecondary);
-    root.style.setProperty('--text-muted', c.textMuted);
-    root.style.setProperty('--border-light', c.borderLight);
-    root.style.setProperty('--border-color', c.borderColor);
     root.style.setProperty('--badge-published-bg', c.statusPublishedBg);
     root.style.setProperty('--badge-published-text', c.statusPublishedText);
     root.style.setProperty('--badge-review-bg', c.statusReviewBg);

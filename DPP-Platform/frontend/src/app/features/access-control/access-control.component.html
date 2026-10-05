@@ -220,8 +220,8 @@
 <!-- ========================================================= -->
 <!-- 5. Provision / Edit User Modal Dialog                     -->
 <!-- ========================================================= -->
-<div class="modal-backdrop" *ngIf="isModalOpen" (click)="closeModal()">
-  <div class="modal-card" (click)="$event.stopPropagation()">
+<div class="modal-backdrop" *ngIf="isModalOpen">
+  <div class="modal-card">
     <!-- Modal Header -->
     <div class="modal-header">
       <div class="modal-header-icon-wrap">
@@ -291,7 +291,7 @@
           <label>Role <span class="required">*</span></label>
           <select formControlName="role" class="form-select">
             <option value="org_admin">Org Admin (Tenant Scoped)</option>
-            <option value="super_admin">Super Admin (Global System)</option>
+            <option value="super_admin" *ngIf="isSuperAdmin">Super Admin (Global System)</option>
           </select>
           <span class="field-hint">
             {{ userForm.get('role')?.value === 'super_admin' ? 'Can manage all organizations and platform settings' : 'Can manage passports and users in their organization' }}
@@ -312,10 +312,20 @@
       <!-- Organization Selection (Shown/required for org_admin) -->
       <div class="form-group" *ngIf="userForm.get('role')?.value === 'org_admin'">
         <label>Assigned Organization <span class="required">*</span></label>
-        <select formControlName="organizationId" class="form-select">
+        
+        <!-- Super Admin gets dropdown of all orgs without raw UUIDs -->
+        <select *ngIf="isSuperAdmin" formControlName="organizationId" class="form-select">
           <option value="" disabled>Select an Organization</option>
-          <option *ngFor="let org of organizations" [value]="org.id">{{ org.name }} ({{ org.tenant_id }})</option>
+          <option *ngFor="let org of organizations" [value]="org.id">{{ org.name }}</option>
         </select>
+
+        <!-- Org Admin gets clean locked view of their current organization -->
+        <div *ngIf="!isSuperAdmin" style="padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px; color: #1e293b; font-weight: 500; display: flex; align-items: center; gap: 8px;">
+          <mat-icon style="font-size: 18px; width: 18px; height: 18px; color: #0284c7;">domain</mat-icon>
+          <span>{{ organizations.length > 0 ? organizations[0].name : (currentUser?.organization?.name || 'Your Organization') }}</span>
+          <span style="margin-left: auto; font-size: 11px; background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 999px; font-weight: 600;">Current Organization</span>
+        </div>
+
         <span class="field-error" *ngIf="userForm.get('organizationId')?.touched && userForm.get('organizationId')?.hasError('required')">
           Organization is required for Org Admins
         </span>
@@ -337,8 +347,8 @@
 <!-- ========================================================= -->
 <!-- 6. Delete Confirmation Dialog                             -->
 <!-- ========================================================= -->
-<div class="modal-backdrop" *ngIf="isDeleteModalOpen" (click)="cancelDelete()">
-  <div class="modal-card modal-sm" (click)="$event.stopPropagation()">
+<div class="modal-backdrop" *ngIf="isDeleteModalOpen">
+  <div class="modal-card modal-sm">
     <div class="modal-header">
       <div class="modal-header-icon-wrap delete-icon-wrap">
         <mat-icon>warning</mat-icon>

@@ -185,7 +185,6 @@ export class CompanyManagementComponent implements OnInit {
       },
       error: () => {
         this.isSaving = false;
-        this.toastService.show('Failed to save company', 'error', 3000);
       },
     });
   }

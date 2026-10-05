@@ -133,8 +133,8 @@ export class OrganizationsController {
     @Body() body: CreateOrgDto,
     @CurrentUser() currentUser: { sub: string; role: string },
   ) {
-    if (currentUser.role !== UserRole.SUPER_ADMIN) {
-      throw new ForbiddenException('Only Super Admin can register a new organization');
+    if (currentUser.role !== UserRole.SUPER_ADMIN && currentUser.role !== UserRole.ORG_ADMIN) {
+      throw new ForbiddenException('Only Administrators can register a new organization');
     }
 
     return this.orgService.create({

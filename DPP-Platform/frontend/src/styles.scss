@@ -1,95 +1,80 @@
-// ==========================================
-// MONK SPACES - Centralized Design Tokens
-// ==========================================
+/* Global Theme Tokens */
 @import '@angular/material/prebuilt-themes/indigo-pink.css';
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  // Brand & Accent Colors (Dynamically managed by ThemeService from theme.config.ts)
-  --brand-primary: #064e3b;
-  --brand-primary-hover: #022c22;
-  --brand-primary-light: #ecfdf5;
+  /* Default: Dark Theme (Gemini Style) */
+  --bg-canvas: #131314;           /* Deep Charcoal Main Canvas */
+  --bg-surface: #1e1f20;          /* Sidebar, Cards, Modal */
+  --bg-surface-hover: #282a2c;    /* Hover State */
+  --bg-surface-active: #333538;   /* Active Tab / Pill */
+  
+  --border-subtle: rgba(255, 255, 255, 0.08); /* 1px crisp separation */
+  --border-focus: rgba(255, 255, 255, 0.2);
+
+  --text-primary: #e3e3e3;
+  --text-secondary: #9aa0a6;
+  --text-muted: #5f6368;
+
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  --sidebar-w-expanded: 260px;
+  --sidebar-w-collapsed: 68px;
+  --transition-smooth: 0.2s cubic-bezier(0.2, 0, 0, 1);
+
+  /* Fallback aliases for child components */
+  --bg-page: var(--bg-canvas);
+  --bg-card: var(--bg-surface);
+  --bg-card-hover: var(--bg-surface-hover);
+  --bg-hover: var(--bg-surface-hover);
+  --bg-active-nav: var(--bg-surface-active);
+  --border-color: var(--border-subtle);
+  --border-light: var(--border-subtle);
+  --brand-primary: #10b981;
   --brand-accent: #10b981;
-  --brand-accent-hover: #059669;
-  --brand-accent-glow: rgba(16, 185, 129, 0.25);
-  --brand-logo-text: #064e3b;
+}
 
-  // Backgrounds
-  --bg-page: #f8fafc;
-  --bg-surface: #ffffff;
-  --bg-sidebar: #0b1f17;
-  --bg-card: #ffffff;
-  --bg-card-hover: #f9fcfb;
-  --bg-hover: #f1f5f9;
-  --bg-active-nav: rgba(16, 185, 129, 0.12);
+/* Light Theme (Clean Crisp Gray/White) */
+[data-theme='light'] {
+  --bg-canvas: #ffffff;
+  --bg-surface: #f0f4f9;
+  --bg-surface-hover: #e1e5ea;
+  --bg-surface-active: #d3d7dc;
 
-  // Typography Colors
-  --text-primary: #0f172a;
-  --text-secondary: #334155;
-  --text-muted: #64748b;
-  --text-light: #94a3b8;
-  --text-active-nav: #10b981;
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-focus: rgba(0, 0, 0, 0.2);
 
-  // Borders & Dividers
-  --border-light: #f1f5f9;
-  --border-color: #e2e8f0;
-  --border-input: #cbd5e1;
-  --border-focus: #10b981;
+  --text-primary: #1f1f1f;
+  --text-secondary: #444746;
+  --text-muted: #747775;
 
-  // Status Badges
-  --badge-draft-bg: #f1f5f9;
-  --badge-draft-text: #475569;
-  --badge-review-bg: #fef3c7;
-  --badge-review-text: #b45309;
-  --badge-published-bg: #dcfce7;
-  --badge-published-text: #15803d;
-
-  // Gradients
-  --gradient-primary: linear-gradient(135deg, #064e3b 0%, #065f46 60%, #047857 100%);
-  --gradient-badge: linear-gradient(135deg, #10b981 0%, #059669 100%);
-
-  // Spacing & Radius
-  --radius-xs: 4px;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 18px;
-  --radius-full: 9999px;
-
-  // Font
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-
-  // Elevation Shadows
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
-  --shadow-card: 0 2px 8px -2px rgba(15, 23, 42, 0.06), 0 1px 4px -1px rgba(15, 23, 42, 0.04);
-  --shadow-card-hover: 0 12px 24px -6px rgba(15, 23, 42, 0.1), 0 4px 8px -2px rgba(15, 23, 42, 0.04);
-  --shadow-dropdown: 0 14px 34px -4px rgba(15, 23, 42, 0.16), 0 6px 14px -3px rgba(15, 23, 42, 0.08);
+  /* Fallback aliases for child components */
+  --bg-page: var(--bg-canvas);
+  --bg-card: var(--bg-surface);
+  --bg-card-hover: var(--bg-surface-hover);
+  --bg-hover: var(--bg-surface-hover);
+  --bg-active-nav: var(--bg-surface-active);
+  --border-color: var(--border-subtle);
+  --border-light: var(--border-subtle);
 }
 
 *, *::before, *::after {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 html, body {
+  margin: 0;
+  padding: 0;
   height: 100%;
   font-family: var(--font-family);
-  background-color: var(--bg-surface);
+  background-color: var(--bg-canvas);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
 }
 
-// Global button reset & consistency
-button {
+button, input {
   font-family: inherit;
 }
 
-input {
-  font-family: inherit;
-}
-
-// Global notification / toast styles
+/* Global Toast Notifications */
 .toast-container {
   position: fixed;
   top: 20px;
@@ -102,10 +87,11 @@ input {
 
 .toast-item {
   padding: 12px 18px;
-  border-radius: var(--radius-sm);
-  background: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -114,28 +100,15 @@ input {
   animation: fadeIn 0.2s ease;
 
   &.toast-success {
-    border-left: 4px solid var(--brand-accent-green);
-    mat-icon { color: var(--brand-accent-green); }
+    border-left: 4px solid #10b981;
   }
 
   &.toast-error {
     border-left: 4px solid #ef4444;
-    mat-icon { color: #ef4444; }
   }
 
   &.toast-info {
-    border-left: 4px solid var(--brand-primary);
-    mat-icon { color: var(--brand-primary); }
-  }
-
-  .toast-close {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text-light);
-    display: flex;
-    align-items: center;
-    margin-left: auto;
+    border-left: 4px solid #3b82f6;
   }
 }
 

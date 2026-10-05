@@ -223,8 +223,8 @@
   </section>
 
   <!-- 5. Register Partner Company Modal -->
-  <div class="modal-backdrop" *ngIf="isModalOpen" (click)="closeModal()">
-    <div class="modal-dialog" (click)="$event.stopPropagation()">
+  <div class="modal-backdrop" *ngIf="isModalOpen">
+    <div class="modal-dialog">
       <div class="modal-header">
         <div class="modal-title-row">
           <div class="modal-icon-wrapper">
@@ -325,8 +325,8 @@
   </div>
 
   <!-- 6. Delete Confirmation Modal -->
-  <div class="modal-backdrop" *ngIf="isDeleteModalOpen" (click)="closeDeleteModal()">
-    <div class="modal-dialog modal-sm" (click)="$event.stopPropagation()">
+  <div class="modal-backdrop" *ngIf="isDeleteModalOpen">
+    <div class="modal-dialog modal-sm">
       <div class="modal-header">
         <div class="modal-title-row">
           <div class="modal-icon-wrapper danger">

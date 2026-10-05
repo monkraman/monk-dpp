@@ -41,6 +41,10 @@ export class AccessControlComponent implements OnInit {
     { id: 'org_admin', label: 'Org Admins', count: 0, icon: 'manage_accounts' },
   ];
 
+  get isSuperAdmin(): boolean {
+    return this.currentUser?.role === 'super_admin';
+  }
+
   constructor(
     private authService: AuthService,
     private userService: UserService,
@@ -177,7 +181,7 @@ export class AccessControlComponent implements OnInit {
       email: '',
       password: 'SecurePassword123!',
       role: 'org_admin',
-      organizationId: this.organizations.length > 0 ? this.organizations[0].id : '',
+      organizationId: this.organizations.length > 0 ? this.organizations[0].id : (this.currentUser?.organizationId || ''),
       status: 'active',
     });
     this.isModalOpen = true;

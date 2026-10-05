@@ -1,0 +1,86 @@
+<!-- Global Toast Notifications -->
+<app-toast></app-toast>
+
+<!-- Public / Auth Flow Layout (Login / Register) -->
+<ng-container *ngIf="isAuthLayout">
+  <router-outlet></router-outlet>
+</ng-container>
+
+<!-- Authenticated App Shell Layout (Gemini Style) -->
+<div *ngIf="!isAuthLayout" class="app-layout" (click)="closeProfileMenu()">
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.collapsed]="isCollapsed">
+    <!-- Top Action Area -->
+    <div class="sidebar-header">
+      <div class="header-top-row">
+        <button class="icon-btn" (click)="toggleSidebar()" aria-label="Toggle Sidebar" title="Toggle Sidebar">
+          <!-- Menu Hamburger / Collapse Icon -->
+          <span class="icon">☰</span>
+        </button>
+        <span class="brand-title" *ngIf="!isCollapsed">Monk Spaces</span>
+      </div>
+
+      <!-- Iconic Gemini Pill Button -->
+      <button class="pill-btn" *ngIf="!isCollapsed" routerLink="/dashboard">
+        <span class="icon">+</span>
+        <span>New Activity</span>
+      </button>
+    </div>
+
+    <!-- Navigation / Recent Items List -->
+    <nav class="nav-section">
+      <div class="nav-label" *ngIf="!isCollapsed">Navigation</div>
+
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" title="Production Dashboard">
+        <span class="icon">💬</span>
+        <span class="label" *ngIf="!isCollapsed">Production Dashboard</span>
+      </a>
+
+      <a routerLink="/product-passports" routerLinkActive="active" class="nav-item" title="Digital Passports">
+        <span class="icon">📊</span>
+        <span class="label" *ngIf="!isCollapsed">Digital Passports</span>
+      </a>
+
+      <a routerLink="/company-management" routerLinkActive="active" class="nav-item" title="Company Management">
+        <span class="icon">🏢</span>
+        <span class="label" *ngIf="!isCollapsed">Company Directory</span>
+      </a>
+
+      <a routerLink="/product-management" routerLinkActive="active" class="nav-item" title="Product Management">
+        <span class="icon">📦</span>
+        <span class="label" *ngIf="!isCollapsed">Product Catalog</span>
+      </a>
+
+      <a routerLink="/user-management" routerLinkActive="active" class="nav-item" title="System Settings">
+        <span class="icon">⚙️</span>
+        <span class="label" *ngIf="!isCollapsed">System Settings</span>
+      </a>
+    </nav>
+
+    <!-- Bottom Footer (Theme Switcher & User Profile) -->
+    <div class="sidebar-footer">
+      <button class="theme-toggle-btn" (click)="toggleTheme()" [title]="isDark ? 'Switch to Light mode' : 'Switch to Dark mode'">
+        <span class="icon">{{ isDark ? '☀️' : '🌙' }}</span>
+        <span class="label" *ngIf="!isCollapsed">{{ isDark ? 'Light mode' : 'Dark mode' }}</span>
+      </button>
+
+      <div class="user-row" *ngIf="!isCollapsed">
+        <div class="user-avatar">{{ getUserInitials() }}</div>
+        <div class="user-meta">
+          <span class="user-name">{{ getUserDisplayName() }}</span>
+          <span class="user-sub">{{ currentUser?.organization?.name || 'Monk Spaces' }}</span>
+        </div>
+        <button class="icon-btn logout" (click)="logout()" title="Sign Out">
+          <span class="icon">🚪</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Dashboard Viewport -->
+  <main class="main-viewport">
+    <div class="content-container">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>

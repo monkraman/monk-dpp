@@ -3,347 +3,34 @@ import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { Title } from '@angular/platform-browser';
 import { AuthService, User } from './core/auth.service';
-import { ThemeService } from './core/services/theme.service';
 
 @Component({
   selector: 'app-root',
-  template: `
-    <!-- Global Toast Notifications -->
-    <app-toast></app-toast>
-
-    <!-- Public / Auth Flow Layout (Login) -->
-    <ng-container *ngIf="isAuthLayout">
-      <router-outlet></router-outlet>
-    </ng-container>
-
-    <!-- Authenticated App Shell Layout (Dashboard) matching screenshot -->
-    <div *ngIf="!isAuthLayout" class="app-layout">
-      <!-- Left Sidebar -->
-      <aside class="sidebar" [class.collapsed]="isCollapsed">
-        <div class="sidebar-top">
-          <div class="brand-container">
-            <app-monk-logo [size]="15"></app-monk-logo>
-          </div>
-
-          <nav class="nav-menu">
-            <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" title="Operations & Metrics Hub">
-              <mat-icon class="nav-icon">insights</mat-icon>
-              <span class="nav-text">Operations Hub</span>
-            </a>
-
-            <a routerLink="/product-passports" routerLinkActive="active" class="nav-item" title="Chain of Custody Digital Passports">
-              <mat-icon class="nav-icon">qr_code_2</mat-icon>
-              <span class="nav-text">Digital Passports</span>
-            </a>
-
-            <a routerLink="/company-management" routerLinkActive="active" class="nav-item" title="To & From Partner Companies">
-              <mat-icon class="nav-icon">domain</mat-icon>
-              <span class="nav-text">Company Management</span>
-            </a>
-
-            <a routerLink="/product-management" routerLinkActive="active" class="nav-item" title="Master Product Records & Visual Assets">
-              <mat-icon class="nav-icon">inventory_2</mat-icon>
-              <span class="nav-text">Product Management</span>
-            </a>
-
-            <a routerLink="/user-management" routerLinkActive="active" class="nav-item" title="User Roles & Team Access">
-              <mat-icon class="nav-icon">manage_accounts</mat-icon>
-              <span class="nav-text">User Management</span>
-            </a>
-          </nav>
-        </div>
-
-        <!-- Collapse Toggle -->
-        <button class="collapse-toggle-btn" (click)="toggleCollapse()" title="Toggle Sidebar">
-          <mat-icon>{{ isCollapsed ? 'chevron_right' : 'chevron_left' }}</mat-icon>
-        </button>
-
-        <!-- Sidebar Bottom Actions & Profile -->
-        <div class="sidebar-bottom">
-          <nav class="nav-menu bottom-menu">
-            <a routerLink="/notifications" routerLinkActive="active" class="nav-item">
-              <mat-icon class="nav-icon">notifications_none</mat-icon>
-              <span class="nav-text">Notifications</span>
-            </a>
-
-            <a routerLink="/settings" routerLinkActive="active" class="nav-item">
-              <mat-icon class="nav-icon">settings</mat-icon>
-              <span class="nav-text">Settings</span>
-            </a>
-          </nav>
-
-          <div class="user-profile-row">
-            <div class="user-avatar">
-              <mat-icon>person</mat-icon>
-            </div>
-            <div class="user-info">
-              <span class="user-name">{{ currentUser?.firstName || 'Raman' }} {{ currentUser?.lastName || 'Thakur' }}</span>
-              <span class="user-org" *ngIf="currentUser?.organization?.name">{{ currentUser?.organization?.name }}</span>
-              <span class="user-email" title="{{ currentUser?.email || 'admin@monkspaces.com' }}">
-                {{ currentUser?.email || 'admin@monkspaces.com' }}
-              </span>
-            </div>
-            <button class="logout-btn" (click)="logout()" title="Log out">
-              <mat-icon>logout</mat-icon>
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      <!-- Main Workspace Content Area -->
-      <main class="main-viewport">
-        <router-outlet></router-outlet>
-      </main>
-    </div>
-  `,
-  styles: [`
-    .app-layout {
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-      background-color: #ffffff;
-      font-family: var(--font-family);
-    }
-
-    .sidebar {
-      width: 230px;
-      min-width: 230px;
-      background-color: #ffffff;
-      border-right: 1px solid #e5e7eb;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      position: relative;
-      transition: width 0.2s ease, min-width 0.2s ease;
-      z-index: 10;
-
-      &.collapsed {
-        width: 72px;
-        min-width: 72px;
-
-        .nav-text,
-        .user-info,
-        app-monk-logo ::ng-deep .logo-text {
-          display: none;
-        }
-
-        .brand-container {
-          padding: 24px 16px;
-        }
-
-        .nav-item {
-          justify-content: center;
-          padding: 10px 0;
-        }
-
-        .user-profile-row {
-          justify-content: center;
-          padding: 12px 8px;
-        }
-      }
-    }
-
-    .sidebar-top {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .brand-container {
-      padding: 24px 20px 20px;
-    }
-
-    .nav-menu {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      padding: 8px 12px;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 9px 12px;
-      border-radius: 6px;
-      color: #4b5563;
-      text-decoration: none;
-      font-size: 13.5px;
-      font-weight: 500;
-      transition: all 0.15s ease;
-
-      .nav-icon {
-        font-size: 19px;
-        width: 19px;
-        height: 19px;
-        color: #6b7280;
-      }
-
-      &:hover {
-        background-color: var(--bg-hover);
-        color: var(--text-primary);
-
-        .nav-icon {
-          color: var(--text-primary);
-        }
-      }
-
-      &.active {
-        background-color: var(--bg-active-nav);
-        color: var(--brand-accent);
-        font-weight: 600;
-
-        .nav-icon {
-          color: var(--brand-accent);
-        }
-      }
-    }
-
-    .collapse-toggle-btn {
-      position: absolute;
-      top: 50%;
-      right: -12px;
-      transform: translateY(-50%);
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: #ffffff;
-      border: 1px solid #e5e7eb;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 20;
-
-      mat-icon {
-        font-size: 16px;
-        width: 16px;
-        height: 16px;
-        color: #6b7280;
-      }
-
-      &:hover {
-        background: #f9fafb;
-        color: #111827;
-      }
-    }
-
-    .sidebar-bottom {
-      border-top: 1px solid #f3f4f6;
-      padding-top: 8px;
-    }
-
-    .bottom-menu {
-      padding-bottom: 4px;
-    }
-
-    .user-profile-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px 16px;
-      border-top: 1px solid #f3f4f6;
-
-      .user-avatar {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background-color: #e5e7eb;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #6b7280;
-        flex-shrink: 0;
-
-        mat-icon {
-          font-size: 20px;
-          width: 20px;
-          height: 20px;
-        }
-      }
-
-      .user-info {
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        flex: 1;
-
-        .user-name {
-          font-size: 13px;
-          font-weight: 600;
-          color: var(--text-primary);
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .user-org {
-          font-size: 11px;
-          font-weight: 600;
-          color: var(--brand-accent);
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .user-email {
-          font-size: 11px;
-          color: var(--text-muted);
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-      }
-
-      .logout-btn {
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: var(--text-light);
-        display: flex;
-        align-items: center;
-        padding: 4px;
-        border-radius: 4px;
-
-        mat-icon {
-          font-size: 18px;
-          width: 18px;
-          height: 18px;
-        }
-
-        &:hover {
-          color: #ef4444;
-          background-color: #fef2f2;
-        }
-      }
-    }
-
-    .main-viewport {
-      flex: 1;
-      height: 100vh;
-      overflow-y: auto;
-      background-color: var(--bg-page);
-      padding: 28px 36px 48px;
-    }
-  `],
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
   isAuthLayout = true;
   isCollapsed = false;
+  isDark = true;
+  isProfileOpen = false;
   currentUser: User | null = null;
 
   constructor(
     private router: Router,
     private titleService: Title,
     private authService: AuthService,
-    private themeService: ThemeService,
   ) {}
 
   ngOnInit(): void {
     this.titleService.setTitle('Monk Spaces - DPP Platform');
-    this.themeService.initTheme();
-    this.currentUser = this.authService.getCurrentUser();
 
+    // Default theme apply (Dark mode default as requested)
+    const savedTheme = localStorage.getItem('app_theme') || 'dark';
+    this.isDark = savedTheme === 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
+    this.currentUser = this.authService.getCurrentUser();
     this.checkLayout(this.router.url);
 
     this.router.events
@@ -351,16 +38,60 @@ export class AppComponent implements OnInit {
       .subscribe((event: any) => {
         this.checkLayout(event.urlAfterRedirects || event.url);
         this.currentUser = this.authService.getCurrentUser();
+        this.isProfileOpen = false;
       });
   }
 
   private checkLayout(url: string): void {
     const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
-    this.isAuthLayout = authRoutes.some(r => url.startsWith(r)) || url === '/';
+    this.isAuthLayout = authRoutes.some(r => url.startsWith(r));
   }
 
-  toggleCollapse(): void {
+  toggleSidebar(): void {
     this.isCollapsed = !this.isCollapsed;
+  }
+
+  toggleTheme(): void {
+    this.isDark = !this.isDark;
+    const theme = this.isDark ? 'dark' : 'light';
+    localStorage.setItem('app_theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
+  }
+
+  toggleProfileMenu(event?: MouseEvent): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.isProfileOpen = !this.isProfileOpen;
+  }
+
+  closeProfileMenu(): void {
+    this.isProfileOpen = false;
+  }
+
+  getUserInitials(): string {
+    if (!this.currentUser) return 'RT';
+    const first = this.currentUser.firstName?.charAt(0) || '';
+    const last = this.currentUser.lastName?.charAt(0) || '';
+    return (first + last).toUpperCase() || this.currentUser.email?.charAt(0).toUpperCase() || 'U';
+  }
+
+  getUserDisplayName(): string {
+    if (!this.currentUser) return 'Raman Thakur';
+    if (this.currentUser.firstName) {
+      return `${this.currentUser.firstName} ${this.currentUser.lastName || ''}`.trim();
+    }
+    return this.currentUser.email.split('@')[0];
+  }
+
+  getPageTitle(): string {
+    const url = this.router.url;
+    if (url.includes('/dashboard')) return 'Operations Hub';
+    if (url.includes('/product-passports') || url.includes('/dpps')) return 'Digital Passports';
+    if (url.includes('/company-management')) return 'Company Management';
+    if (url.includes('/product-management')) return 'Product Management';
+    if (url.includes('/user-management') || url.includes('/access-control')) return 'System Settings';
+    return 'Dashboard';
   }
 
   logout(): void {
