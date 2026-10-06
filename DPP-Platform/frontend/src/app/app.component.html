@@ -45,24 +45,6 @@
       </a>
     </nav>
 
-    <!-- Bottom Footer (Theme Switcher & User Profile) -->
-    <div class="sidebar-footer">
-      <button class="theme-toggle-btn" (click)="toggleTheme()" [title]="isDark ? 'Switch to Light mode' : 'Switch to Dark mode'">
-        <span class="icon">{{ isDark ? '☀️' : '🌙' }}</span>
-        <span class="label" *ngIf="!isCollapsed">{{ isDark ? 'Light mode' : 'Dark mode' }}</span>
-      </button>
-
-      <div class="user-row" *ngIf="!isCollapsed">
-        <div class="user-avatar">{{ getUserInitials() }}</div>
-        <div class="user-meta">
-          <span class="user-name">{{ getUserDisplayName() }}</span>
-          <span class="user-sub">{{ currentUser?.organization?.name || 'Monk Spaces' }}</span>
-        </div>
-        <button class="icon-btn logout" (click)="logout()" title="Sign Out">
-          <span class="icon">🚪</span>
-        </button>
-      </div>
-    </div>
   </aside>
 
   <!-- Right App Container: Top Header + Main Viewport -->

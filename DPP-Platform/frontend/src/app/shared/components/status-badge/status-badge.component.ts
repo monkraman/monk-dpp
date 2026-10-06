@@ -24,98 +24,63 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     .status-badge {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      padding: 4px 10px;
-      border-radius: 12px;
+      gap: 6px;
       font-size: 12px;
       font-weight: 500;
       white-space: nowrap;
+      color: var(--text-primary);
+
+      .status-icon {
+        font-size: 15px;
+        width: 15px;
+        height: 15px;
+        color: var(--text-secondary);
+      }
+
+      .status-label {
+        line-height: 1;
+      }
     }
-    /* DPP Unified Semantic Status System */
-    /* 1. Success / Live / Active / Published / Approved / Completed */
+
     .status-badge--published,
     .status-badge--completed,
     .status-badge--active,
     .status-badge--approved,
     .status-badge--success,
     .status-badge--verified {
-      background: rgba(16, 185, 129, 0.15);
-      color: #34d399;
-      border: 1px solid rgba(16, 185, 129, 0.3);
-    }
-    :host-context([data-theme='light']) .status-badge--published,
-    :host-context([data-theme='light']) .status-badge--completed,
-    :host-context([data-theme='light']) .status-badge--active,
-    :host-context([data-theme='light']) .status-badge--approved,
-    :host-context([data-theme='light']) .status-badge--success,
-    :host-context([data-theme='light']) .status-badge--verified {
-      background: #ecfdf5;
-      color: #065f46;
-      border: 1px solid #a7f3d0;
+      .status-icon {
+        color: #10b981;
+      }
     }
 
-    /* 2. Pending / Review / Submitted / Sent / Responded */
     .status-badge--pending,
     .status-badge--submitted,
     .status-badge--sent,
     .status-badge--responded {
-      background: rgba(245, 158, 11, 0.15);
-      color: #fbbf24;
-      border: 1px solid rgba(245, 158, 11, 0.3);
-    }
-    :host-context([data-theme='light']) .status-badge--pending,
-    :host-context([data-theme='light']) .status-badge--submitted,
-    :host-context([data-theme='light']) .status-badge--sent,
-    :host-context([data-theme='light']) .status-badge--responded {
-      background: #fef3c7;
-      color: #92400e;
-      border: 1px solid #fde68a;
+      .status-icon {
+        color: #f59e0b;
+      }
     }
 
-    /* 3. Neutral / Draft / Archived / Expired / Inactive */
     .status-badge--draft,
     .status-badge--archived,
     .status-badge--deleted,
     .status-badge--expired,
     .status-badge--inactive,
     .status-badge--unverified {
-      background: rgba(148, 163, 184, 0.12);
-      color: #cbd5e1;
-      border: 1px solid rgba(148, 163, 184, 0.25);
-    }
-    :host-context([data-theme='light']) .status-badge--draft,
-    :host-context([data-theme='light']) .status-badge--archived,
-    :host-context([data-theme='light']) .status-badge--deleted,
-    :host-context([data-theme='light']) .status-badge--expired,
-    :host-context([data-theme='light']) .status-badge--inactive,
-    :host-context([data-theme='light']) .status-badge--unverified {
-      background: #f1f5f9;
-      color: #475569;
-      border: 1px solid #cbd5e1;
+      color: var(--text-secondary);
+      .status-icon {
+        color: var(--text-muted);
+      }
     }
 
-    /* 4. Danger / Error / Failed / Rejected */
     .status-badge--error,
     .status-badge--failed,
     .status-badge--rejected {
-      background: rgba(239, 68, 68, 0.15);
-      color: #f87171;
-      border: 1px solid rgba(239, 68, 68, 0.3);
-    }
-    :host-context([data-theme='light']) .status-badge--error,
-    :host-context([data-theme='light']) .status-badge--failed,
-    :host-context([data-theme='light']) .status-badge--rejected {
-      background: #fef2f2;
-      color: #991b1b;
-      border: 1px solid #fecaca;
-    }
-    .status-icon {
-      font-size: 14px;
-      width: 14px;
-      height: 14px;
-    }
-    .status-label {
-      line-height: 1;
+      color: #ef4444;
+      .status-icon {
+        color: #ef4444;
+      }
     }
   `]
 })

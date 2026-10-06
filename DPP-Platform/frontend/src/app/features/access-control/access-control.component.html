@@ -1,25 +1,12 @@
 <div class="access-control-viewport">
-  <!-- 1. Executive Context Header -->
-  <header class="executive-header">
-    <div class="header-main">
-      <div class="greeting-badge-row">
-        <span class="platform-badge">
-          <mat-icon class="badge-icon">admin_panel_settings</mat-icon>
-          Identity & Governance
-        </span>
-        <span class="tenant-badge" *ngIf="currentUser?.organization?.name">
-          <mat-icon class="tenant-icon">business</mat-icon>
-          {{ currentUser?.organization?.name }}
-        </span>
-      </div>
-      <h1 class="executive-title">User & Access Management</h1>
-      <p class="executive-subtitle">
-        Manage platform super administrators, tenant organization admins, and cross-enterprise access boundaries.
-      </p>
+  <!-- Top Action Bar -->
+  <div class="users-action-bar">
+    <div class="action-bar-left">
+      <h1 class="page-title">Manage Users</h1>
+      <span class="user-count">{{ filteredUsers.length }} accounts</span>
     </div>
 
-    <!-- Action Toolbar -->
-    <div class="header-actions">
+    <div class="action-bar-right">
       <button type="button" class="btn-secondary" (click)="loadData()" [disabled]="isLoading" title="Refresh user list">
         <mat-icon class="btn-icon" [class.spin]="isLoading">refresh</mat-icon>
         <span>Refresh</span>
@@ -30,50 +17,7 @@
         <span>Provision User</span>
       </button>
     </div>
-  </header>
-
-  <!-- 2. Governance KPI Metrics Grid -->
-  <section class="metrics-grid">
-    <app-stat-card
-      label="Total Directory Users"
-      [value]="users.length"
-      unit="Accounts"
-      change="Active Directory"
-      trend="positive"
-      detail="Across all registered tenants"
-      icon="people"
-    ></app-stat-card>
-
-    <app-stat-card
-      label="Super Administrators"
-      [value]="superAdminCount"
-      unit="Admins"
-      change="Cross-Tenant"
-      trend="neutral"
-      detail="Full system configuration rights"
-      icon="shield"
-    ></app-stat-card>
-
-    <app-stat-card
-      label="Organization Admins"
-      [value]="orgAdminCount"
-      unit="Admins"
-      change="Tenant Scoped"
-      trend="positive"
-      detail="Scoped to specific company orgs"
-      icon="business_center"
-    ></app-stat-card>
-
-    <app-stat-card
-      label="Connected Organizations"
-      [value]="totalOrgsCount"
-      unit="Companies"
-      change="Multi-Tenant"
-      trend="positive"
-      detail="Active enterprise tenants"
-      icon="domain"
-    ></app-stat-card>
-  </section>
+  </div>
 
   <!-- 3. Directory Filter & Search Bar -->
   <section class="controls-card">
@@ -159,14 +103,12 @@
 
             <!-- Role Badge -->
             <td>
-              <div class="role-badge-wrap">
-                <span class="role-badge" [ngClass]="getRoleBadgeClass(user.role)">
-                  <mat-icon class="role-badge-icon">
-                    {{ user.role === 'super_admin' ? 'admin_panel_settings' : 'manage_accounts' }}
-                  </mat-icon>
-                  {{ getRoleDisplay(user.role) }}
-                </span>
-              </div>
+              <span class="role-text">
+                <mat-icon class="role-icon">
+                  {{ user.role === 'super_admin' ? 'admin_panel_settings' : 'manage_accounts' }}
+                </mat-icon>
+                <span>{{ getRoleDisplay(user.role) }}</span>
+              </span>
             </td>
 
             <!-- Organization -->

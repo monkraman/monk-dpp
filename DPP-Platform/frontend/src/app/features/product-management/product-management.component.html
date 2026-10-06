@@ -1,81 +1,25 @@
 <div class="product-management-viewport">
-  <!-- 1. Executive Context Header -->
-  <header class="executive-header">
-    <div class="header-main">
-      <div class="greeting-badge-row">
-        <span class="platform-badge">
-          <mat-icon class="badge-icon">inventory_2</mat-icon>
-          Product Master & Visual Assets
-        </span>
-        <span class="tenant-badge" *ngIf="currentUser?.organization?.name">
-          <mat-icon class="tenant-icon">verified</mat-icon>
-          {{ currentUser?.organization?.name }}
-        </span>
-      </div>
-      <h1 class="executive-title">Product Management & Master Catalog</h1>
-      <p class="executive-subtitle">
-        Maintain product records, photographic assets, technical specifications, and component bills of materials (BOM) for Digital Product Passport creation.
-      </p>
+  <!-- Top Compact Action Bar -->
+  <div class="catalog-action-bar">
+    <div class="action-bar-left">
+      <h1 class="page-title">Product Catalog</h1>
+      <span class="catalog-count">{{ filteredProducts.length }} items</span>
     </div>
 
-    <!-- Action Toolbar -->
-    <div class="header-actions">
+    <div class="action-bar-right">
       <button type="button" class="btn-secondary" (click)="loadProducts()" [disabled]="isLoading" title="Refresh catalog">
         <mat-icon class="btn-icon" [class.spin]="isLoading">refresh</mat-icon>
         <span>Refresh</span>
       </button>
 
       <button type="button" class="btn-primary" (click)="openCreateModal()">
-        <mat-icon class="btn-icon">add_photo_alternate</mat-icon>
+        <mat-icon class="btn-icon">add</mat-icon>
         <span>Add Product Record</span>
       </button>
     </div>
-  </header>
+  </div>
 
-  <!-- 2. Governance KPI Metrics Grid -->
-  <section class="metrics-grid">
-    <app-stat-card
-      label="Total Catalog SKUs"
-      [value]="products.length"
-      unit="SKUs"
-      change="Master Catalog"
-      trend="positive"
-      detail="Active product records"
-      icon="category"
-    ></app-stat-card>
-
-    <app-stat-card
-      label="Packaging & Polymers"
-      [value]="categoryTabs[1].count || 0"
-      unit="Containers"
-      change="Consumer Sector"
-      trend="positive"
-      detail="Bottles, caps, and boxes"
-      icon="takeout_dining"
-    ></app-stat-card>
-
-    <app-stat-card
-      label="Energy & Batteries"
-      [value]="categoryTabs[2].count || 0"
-      unit="Battery Packs"
-      change="ESPR Mandate"
-      trend="neutral"
-      detail="EV & Industrial cells"
-      icon="battery_charging_full"
-    ></app-stat-card>
-
-    <app-stat-card
-      label="Passports Published"
-      [value]="4"
-      unit="Live DPPs"
-      change="Chain of Custody"
-      trend="positive"
-      detail="Verified with GS1 QR codes"
-      icon="qr_code_2"
-    ></app-stat-card>
-  </section>
-
-  <!-- 3. Filter Controls & Search -->
+  <!-- Filter Controls & Search -->
   <section class="controls-card">
     <div class="filter-tabs-wrapper">
       <app-filter-tabs
@@ -111,7 +55,7 @@
     </div>
   </section>
 
-  <!-- 4. Products Table / Visual List -->
+  <!-- Products Table / Visual List -->
   <section class="table-card">
     <div *ngIf="isLoading" class="loading-state">
       <mat-spinner diameter="44"></mat-spinner>
@@ -165,10 +109,8 @@
             <!-- Category & Type -->
             <td class="col-type">
               <div class="type-cell">
-                <span class="category-pill">{{ product.category }}</span>
-                <span class="type-subtext" [ngClass]="product.type.toLowerCase()">
-                  {{ product.type }} Item
-                </span>
+                <span class="category-name">{{ product.category }}</span>
+                <span class="type-subtext">{{ product.type }} Item</span>
               </div>
             </td>
 
@@ -191,16 +133,16 @@
             <!-- DPP Passport Status -->
             <td class="col-dpp">
               <div class="passport-status-cell">
-                <span class="dpp-badge published" *ngIf="product.status === 'published'">
-                  <mat-icon class="badge-icon">check_circle</mat-icon>
+                <span class="status-indicator active" *ngIf="product.status === 'published'">
+                  <span class="status-dot"></span>
                   <span>{{ product.dppId || 'Active DPP' }}</span>
                 </span>
-                <span class="dpp-badge draft" *ngIf="product.status === 'draft'">
-                  <mat-icon class="badge-icon">edit_note</mat-icon>
+                <span class="status-indicator draft" *ngIf="product.status === 'draft'">
+                  <span class="status-dot"></span>
                   <span>Draft DPP</span>
                 </span>
-                <span class="dpp-badge unlinked" *ngIf="product.status === 'unlinked'">
-                  <mat-icon class="badge-icon">link_off</mat-icon>
+                <span class="status-indicator unlinked" *ngIf="product.status === 'unlinked'">
+                  <span class="status-dot"></span>
                   <span>No Passport</span>
                 </span>
               </div>
@@ -211,7 +153,7 @@
               <div class="action-buttons">
                 <button
                   type="button"
-                  class="btn-action-primary"
+                  class="btn-action"
                   routerLink="/product-passports"
                   title="Generate or view DPP"
                 >

@@ -1,25 +1,12 @@
 <div class="company-management-viewport">
-  <!-- 1. Executive Context Header -->
-  <header class="executive-header">
-    <div class="header-main">
-      <div class="greeting-badge-row">
-        <span class="platform-badge">
-          <mat-icon class="badge-icon">domain</mat-icon>
-          Supply Chain Provenance
-        </span>
-        <span class="tenant-badge" *ngIf="currentUser?.organization?.name">
-          <mat-icon class="tenant-icon">verified</mat-icon>
-          {{ currentUser?.organization?.name }}
-        </span>
-      </div>
-      <h1 class="executive-title">Company & Partner Directory</h1>
-      <p class="executive-subtitle">
-        Manage supplier organizations ("From"), internal manufacturing entities, and recipient clients ("To") across the digital passport chain of custody.
-      </p>
+  <!-- Top Action Bar -->
+  <div class="directory-action-bar">
+    <div class="action-bar-left">
+      <h1 class="page-title">Company Directory</h1>
+      <span class="directory-count">{{ filteredCompanies.length }} partners</span>
     </div>
 
-    <!-- Action Toolbar -->
-    <div class="header-actions">
+    <div class="action-bar-right">
       <button type="button" class="btn-secondary" (click)="loadCompanies()" [disabled]="isLoading" title="Refresh directory">
         <mat-icon class="btn-icon" [class.spin]="isLoading">refresh</mat-icon>
         <span>Refresh</span>
@@ -27,55 +14,12 @@
 
       <button type="button" class="btn-primary" (click)="openCreateModal()">
         <mat-icon class="btn-icon">add_business</mat-icon>
-        <span>Register Partner Company</span>
+        <span>Register Company</span>
       </button>
     </div>
-  </header>
+  </div>
 
-  <!-- 2. Governance KPI Metrics Grid -->
-  <section class="metrics-grid">
-    <app-stat-card
-      label="Total Companies"
-      [value]="companies.length"
-      unit="Entities"
-      change="Active Network"
-      trend="positive"
-      detail="Registered in supply ecosystem"
-      icon="corporate_fare"
-    ></app-stat-card>
-
-    <app-stat-card
-      label="Suppliers ('From')"
-      [value]="roleTabs[1].count || 0"
-      unit="Partners"
-      change="Material Feed"
-      trend="neutral"
-      detail="Issuing component certificates"
-      icon="input"
-    ></app-stat-card>
-
-    <app-stat-card
-      label="Recipients ('To')"
-      [value]="roleTabs[3].count || 0"
-      unit="Clients"
-      change="Direct Customers"
-      trend="positive"
-      detail="Receiving finished DPP records"
-      icon="output"
-    ></app-stat-card>
-
-    <app-stat-card
-      label="Circular Recyclers"
-      [value]="roleTabs[4].count || 0"
-      unit="Recyclers"
-      change="Closed Loop"
-      trend="positive"
-      detail="End-of-life takeback partners"
-      icon="recycling"
-    ></app-stat-card>
-  </section>
-
-  <!-- 3. Filter Controls & Search -->
+  <!-- Filter Controls & Search -->
   <section class="controls-card">
     <div class="filter-tabs-wrapper">
       <app-filter-tabs
@@ -111,7 +55,7 @@
     </div>
   </section>
 
-  <!-- 4. Company Directory Table -->
+  <!-- Company Directory Table -->
   <section class="table-card">
     <div *ngIf="isLoading" class="loading-state">
       <mat-spinner diameter="44"></mat-spinner>
@@ -160,12 +104,12 @@
 
             <!-- Role Badge -->
             <td class="col-role">
-              <span class="role-pill" [ngClass]="getRoleBadgeClass(company.role)">
-                <mat-icon class="pill-icon" *ngIf="company.role === 'supplier'">input</mat-icon>
-                <mat-icon class="pill-icon" *ngIf="company.role === 'internal'">factory</mat-icon>
-                <mat-icon class="pill-icon" *ngIf="company.role === 'recipient'">output</mat-icon>
-                <mat-icon class="pill-icon" *ngIf="company.role === 'recycler'">recycling</mat-icon>
-                {{ company.roleLabel }}
+              <span class="role-text">
+                <mat-icon class="role-icon" *ngIf="company.role === 'supplier'">input</mat-icon>
+                <mat-icon class="role-icon" *ngIf="company.role === 'internal'">factory</mat-icon>
+                <mat-icon class="role-icon" *ngIf="company.role === 'recipient'">output</mat-icon>
+                <mat-icon class="role-icon" *ngIf="company.role === 'recycler'">recycling</mat-icon>
+                <span>{{ company.roleLabel }}</span>
               </span>
             </td>
 
@@ -192,13 +136,13 @@
 
             <!-- Status -->
             <td class="col-status">
-              <span class="status-chip active" *ngIf="company.verificationStatus === 'verified'">
-                <mat-icon class="status-dot">check_circle</mat-icon>
-                Verified Partner
+              <span class="status-indicator active" *ngIf="company.verificationStatus === 'verified'">
+                <span class="status-dot"></span>
+                <span>Verified Partner</span>
               </span>
-              <span class="status-chip active" *ngIf="company.verificationStatus === 'active'">
-                <mat-icon class="status-dot">radio_button_checked</mat-icon>
-                Active
+              <span class="status-indicator active" *ngIf="company.verificationStatus === 'active'">
+                <span class="status-dot"></span>
+                <span>Active</span>
               </span>
             </td>
 
