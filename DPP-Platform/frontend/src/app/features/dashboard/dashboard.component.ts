@@ -221,7 +221,7 @@ export class DashboardComponent implements OnInit {
   }
 
   createNewPassport(): void {
-    this.router.navigate(['/product-passports']);
+    this.toastService.show('Initiating new Digital Product Passport registration...', 'info', 2500);
   }
 
   exportAuditReport(): void {

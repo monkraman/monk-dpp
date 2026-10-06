@@ -20,40 +20,28 @@
         <span class="brand-title" *ngIf="!isCollapsed">Monk Spaces</span>
       </div>
 
-      <!-- Iconic Gemini Pill Button -->
-      <button class="pill-btn" *ngIf="!isCollapsed" routerLink="/dashboard">
-        <span class="icon">+</span>
-        <span>New Activity</span>
-      </button>
     </div>
 
-    <!-- Navigation / Recent Items List -->
+    <!-- Navigation List -->
     <nav class="nav-section">
-      <div class="nav-label" *ngIf="!isCollapsed">Navigation</div>
-
-      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" title="Production Dashboard">
-        <span class="icon">💬</span>
-        <span class="label" *ngIf="!isCollapsed">Production Dashboard</span>
-      </a>
-
       <a routerLink="/product-passports" routerLinkActive="active" class="nav-item" title="Digital Passports">
         <span class="icon">📊</span>
         <span class="label" *ngIf="!isCollapsed">Digital Passports</span>
       </a>
 
-      <a routerLink="/company-management" routerLinkActive="active" class="nav-item" title="Company Management">
+      <a routerLink="/company-management" routerLinkActive="active" class="nav-item" title="Company Directory">
         <span class="icon">🏢</span>
         <span class="label" *ngIf="!isCollapsed">Company Directory</span>
       </a>
 
-      <a routerLink="/product-management" routerLinkActive="active" class="nav-item" title="Product Management">
+      <a routerLink="/product-management" routerLinkActive="active" class="nav-item" title="Product Catalog">
         <span class="icon">📦</span>
         <span class="label" *ngIf="!isCollapsed">Product Catalog</span>
       </a>
 
-      <a routerLink="/user-management" routerLinkActive="active" class="nav-item" title="System Settings">
-        <span class="icon">⚙️</span>
-        <span class="label" *ngIf="!isCollapsed">System Settings</span>
+      <a routerLink="/user-management" routerLinkActive="active" class="nav-item" title="Manage Users">
+        <span class="icon">👥</span>
+        <span class="label" *ngIf="!isCollapsed">Manage Users</span>
       </a>
     </nav>
 

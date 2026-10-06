@@ -48,7 +48,7 @@ export class LoginComponent implements OnInit {
         const userName = user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'User';
         const orgName = user?.organization?.name || 'Your Organization';
         this.toastService.show(`Welcome back, ${userName} (${orgName})`, 'success', 3000);
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/product-passports']);
       },
       error: (err) => {
         this.isLoading = false;
@@ -72,7 +72,7 @@ export class LoginComponent implements OnInit {
             },
             createdAt: new Date().toISOString(),
           });
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/product-passports']);
         } else {
           const message = err.error?.message || 'Login failed. Please verify credentials.';
           this.toastService.show(message, 'error', 4000);

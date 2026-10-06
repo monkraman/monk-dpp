@@ -168,7 +168,7 @@ export interface UploadedFileItem {
       transition: all 0.2s ease;
     }
     .icon-circle .drop-icon {
-      color: #2563eb;
+      color: #10b981;
       font-size: 24px;
       width: 24px;
       height: 24px;
@@ -177,7 +177,7 @@ export interface UploadedFileItem {
       background: #f0fdf4;
     }
     .icon-circle.doc-circle .drop-icon {
-      color: #16a34a;
+      color: #10b981;
     }
 
     .primary-label {
@@ -207,8 +207,8 @@ export interface UploadedFileItem {
       justify-content: center;
     }
     .image-uploader.drag-over {
-      border-color: #2563eb;
-      background: #eff6ff;
+      border-color: #10b981;
+      background: rgba(16, 185, 129, 0.08);
     }
     .image-dropzone {
       padding: 24px;
@@ -327,8 +327,8 @@ export interface UploadedFileItem {
       letter-spacing: 0.5px;
       padding: 2px 6px;
       border-radius: 4px;
-      background: #eff6ff;
-      color: #2563eb;
+      background: rgba(16, 185, 129, 0.12);
+      color: #10b981;
     }
     .doc-meta {
       display: flex;

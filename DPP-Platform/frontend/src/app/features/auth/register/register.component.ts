@@ -61,7 +61,7 @@ export class RegisterComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.authService.isAuthenticated()) {
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/product-passports']);
       return;
     }
 
@@ -145,7 +145,7 @@ export class RegisterComponent implements OnInit {
           'success',
           4000
         );
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/product-passports']);
       },
       error: (err) => {
         this.isLoading = false;

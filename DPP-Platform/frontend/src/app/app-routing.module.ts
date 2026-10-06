@@ -12,13 +12,13 @@ const routes: Routes = [
     path: 'register',
     loadChildren: () => import('./features/auth/register/register.module').then((m) => m.RegisterModule),
   },
-  // Operations Hub / Dashboard
+  // Digital Product Passports Registry (Primary Operations Hub)
   {
-    path: 'dashboard',
+    path: 'product-passports',
     loadChildren: () => import('./features/dashboard/dashboard.module').then((m) => m.DashboardModule),
     canActivate: [AuthGuard],
   },
-  { path: 'product-passports', redirectTo: 'dashboard' },
+  { path: 'dashboard', redirectTo: 'product-passports' },
 
   // 1. Company Management (To & From Companies, Supply Chain Directory)
   {

@@ -32,8 +32,8 @@
       }
 
       .platform-badge {
-        background: rgba(37, 99, 235, 0.1);
-        color: #2563eb;
+        background: rgba(16, 185, 129, 0.12);
+        color: #10b981;
       }
 
       .tenant-badge {
@@ -95,13 +95,13 @@
 }
 
 .btn-primary {
-  background: #2563eb;
+  background: #10b981;
   color: #ffffff;
-  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
 
   &:hover {
-    background: #1d4ed8;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    background: #059669;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
     transform: translateY(-1px);
   }
 
@@ -176,9 +176,8 @@
         transition: all 0.2s;
 
         &:focus {
-          border-color: #2563eb;
-          background: #ffffff;
-          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+          border-color: #10b981;
+          box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
         }
       }
 
@@ -312,7 +311,7 @@
       color: #6b7280;
 
       &.custom {
-        color: #2563eb;
+        color: #10b981;
         font-weight: 600;
       }
 
@@ -514,8 +513,8 @@
           width: 44px;
           height: 44px;
           border-radius: 10px;
-          background: #eff6ff;
-          color: #2563eb;
+          background: rgba(16, 185, 129, 0.12);
+          color: #10b981;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -589,8 +588,8 @@
           transition: all 0.2s;
 
           &:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
           }
         }
 

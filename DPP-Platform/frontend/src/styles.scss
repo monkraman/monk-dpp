@@ -29,7 +29,15 @@
   --border-color: var(--border-subtle);
   --border-light: var(--border-subtle);
   --brand-primary: #10b981;
+  --brand-primary-hover: #059669;
+  --brand-primary-light: rgba(16, 185, 129, 0.15);
   --brand-accent: #10b981;
+  --brand-accent-hover: #059669;
+  --brand-accent-glow: rgba(16, 185, 129, 0.25);
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
 }
 
 /* Light Theme (Clean Crisp Gray/White) */

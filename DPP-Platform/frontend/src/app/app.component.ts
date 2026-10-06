@@ -90,7 +90,7 @@ export class AppComponent implements OnInit {
     if (url.includes('/product-passports') || url.includes('/dpps')) return 'Digital Passports';
     if (url.includes('/company-management')) return 'Company Management';
     if (url.includes('/product-management')) return 'Product Management';
-    if (url.includes('/user-management') || url.includes('/access-control')) return 'System Settings';
+    if (url.includes('/user-management') || url.includes('/access-control')) return 'Manage Users';
     return 'Dashboard';
   }
 

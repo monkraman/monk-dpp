@@ -1,3 +1,14 @@
+import * as net from 'net';
+import * as dns from 'dns';
+
+// Fix Node.js 18+ ETIMEDOUT when connecting to cloud databases (Neon, AWS, etc.) on Windows/dual-stack networks
+if (typeof (net as any).setDefaultAutoSelectFamily === 'function') {
+  (net as any).setDefaultAutoSelectFamily(false);
+}
+if (typeof dns.setDefaultResultOrder === 'function') {
+  dns.setDefaultResultOrder('ipv4first');
+}
+
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
