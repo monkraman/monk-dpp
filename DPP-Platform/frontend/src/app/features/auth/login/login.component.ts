@@ -23,7 +23,7 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({
-      email: ['raman@monkspaces.com', [Validators.required, Validators.email]],
+      email: ['admin@monkspaces.com', [Validators.required, Validators.email]],
       password: ['••••••••', [Validators.required]],
     });
   }
@@ -40,6 +40,31 @@ export class LoginComponent implements OnInit {
 
     this.isLoading = true;
     const { email, password } = this.loginForm.value;
+
+    // Prefilled demo credentials handler for client demo
+    if (email === 'admin@monkspaces.com' && (password === '••••••••' || password === 'admin123' || password === 'password123')) {
+      setTimeout(() => {
+        this.isLoading = false;
+        this.authService.setTokens('mock-jwt-token-monkspaces-2026', 'mock-refresh-token-monkspaces');
+        this.authService.setCurrentUser({
+          id: 'admin-monk-01',
+          email: 'admin@monkspaces.com',
+          firstName: 'Admin',
+          lastName: 'Monk',
+          role: 'admin',
+          organizationId: 'org-monkspaces-01',
+          organization: {
+            id: 'org-monkspaces-01',
+            name: 'Monkspaces Technologies',
+            slug: 'monkspaces-technologies',
+          },
+          createdAt: new Date().toISOString(),
+        });
+        this.toastService.show('Welcome back, Admin Monk (Monkspaces Technologies)', 'success', 3000);
+        this.router.navigate(['/product-passports']);
+      }, 400);
+      return;
+    }
 
     this.authService.login(email, password).subscribe({
       next: (res: any) => {
