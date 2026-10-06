@@ -1,150 +1,105 @@
 <div class="dashboard-viewport">
-  <!-- 1. Clean Context Header for Digital Passports -->
-  <header class="executive-header">
-    <div class="header-main">
-      <div class="greeting-badge-row">
-        <span class="platform-badge">
-          <mat-icon class="badge-icon">verified</mat-icon>
-          EU Digital Product Passport (ESPR)
-        </span>
-        <span class="tenant-badge" *ngIf="currentUser?.organization?.name">
-          <mat-icon class="tenant-icon">business</mat-icon>
-          {{ currentUser?.organization?.name }}
-        </span>
-      </div>
-      <h1 class="executive-title">Digital Passport Registry</h1>
-      <p class="executive-subtitle">
-        Universal product passport registry, circularity metrics, and EU regulatory compliance across all product sectors.
-      </p>
+  <!-- Clean Action Bar -->
+  <div class="page-action-row">
+    <div class="title-meta">
+      <h1 class="page-heading">Digital Passports</h1>
+      <span class="count-tag">{{ filteredPassports.length }} Passports</span>
     </div>
 
-    <!-- Action Toolbar -->
-    <div class="header-actions">
-      <!-- Export Audit Button -->
+    <div class="action-buttons-group">
       <button type="button" class="btn-secondary" (click)="exportAuditReport()">
         <mat-icon class="btn-icon">download</mat-icon>
         <span>Export Audit Pack</span>
       </button>
 
-      <!-- Primary Action: Create DPP -->
       <button type="button" class="btn-primary" (click)="createNewPassport()">
-        <mat-icon class="btn-icon">add_circle</mat-icon>
+        <mat-icon class="btn-icon">add</mat-icon>
         <span>Create Passport</span>
       </button>
     </div>
-  </header>
+  </div>
 
-  <!-- 4. Universal DPP Registry Section -->
-  <section class="registry-section">
-    <!-- Top Filter & Search Bar -->
-    <div class="registry-controls-card">
-      <div class="controls-row-top">
-        <div class="title-with-count">
-          <h2 class="section-title">Digital Passport Registry</h2>
-          <span class="count-pill">{{ filteredPassports.length }} Passports</span>
-        </div>
+  <!-- Search & Filter Controls Bar -->
+  <div class="table-controls-card">
+    <div class="controls-left">
+      <app-search-input
+        placeholder="Search by ID, product, GTIN, material..."
+        [maxWidth]="320"
+        (searchChange)="onSearchChange($event)"
+      ></app-search-input>
 
-        <!-- Reusable Search Input -->
-        <app-search-input
-          placeholder="Search by ID, product, GTIN, material..."
-          [maxWidth]="340"
-          (searchChange)="onSearchChange($event)"
-        ></app-search-input>
-      </div>
-
-      <div class="controls-row-bottom">
-        <!-- Reusable Industry Filter Tabs -->
-        <app-filter-tabs
-          [tabs]="industryTabs"
-          [activeTab]="activeIndustryFilter"
-          (tabChange)="onIndustryTabChange($event)"
-        ></app-filter-tabs>
-
-        <!-- Reusable Status Filter Tabs -->
-        <app-filter-tabs
-          [tabs]="statusTabs"
-          [activeTab]="activeStatusFilter"
-          (tabChange)="onStatusTabChange($event)"
-        ></app-filter-tabs>
-      </div>
+      <app-filter-tabs
+        [tabs]="industryTabs"
+        [activeTab]="activeIndustryFilter"
+        (tabChange)="onIndustryTabChange($event)"
+      ></app-filter-tabs>
     </div>
 
-    <!-- Table -->
-    <div class="table-card">
-      <div class="table-responsive">
-        <table class="enterprise-table">
-          <thead>
-            <tr>
-              <th>Passport & Product</th>
-              <th>Sector</th>
-              <th>Material & Circularity</th>
-              <th>Carbon Footprint</th>
-              <th>Origin Facility</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              *ngFor="let p of filteredPassports"
-              class="table-row-interactive"
-              (click)="viewPassportDetails(p)"
-            >
-              <!-- Product & Passport ID -->
-              <td class="product-cell">
-                <div class="product-avatar">
-                  <mat-icon *ngIf="p.industryCode === 'TEXTILES'">checkroom</mat-icon>
-                  <mat-icon *ngIf="p.industryCode === 'BATTERIES'">battery_charging_full</mat-icon>
-                  <mat-icon *ngIf="p.industryCode === 'ELECTRONICS'">devices</mat-icon>
-                  <mat-icon *ngIf="p.industryCode === 'PACKAGING'">inventory_2</mat-icon>
-                </div>
-                <div class="product-text">
-                  <span class="product-name">{{ p.productName }}</span>
-                  <div class="id-subrow">
-                    <code class="dpp-id">{{ p.id }}</code>
-                    <span class="gtin-code">GTIN: {{ p.gtin }}</span>
-                  </div>
-                </div>
-              </td>
+    <div class="controls-right">
+      <app-filter-tabs
+        [tabs]="statusTabs"
+        [activeTab]="activeStatusFilter"
+        (tabChange)="onStatusTabChange($event)"
+      ></app-filter-tabs>
+    </div>
+  </div>
 
-              <!-- Sector -->
-              <td>
-                <span class="sector-badge" [class]="'sector-' + p.industryCode.toLowerCase()">
-                  {{ p.industry }}
-                </span>
-              </td>
+  <!-- Pure Functional Enterprise Table (NO colorful badges) -->
+  <div class="table-card">
+    <div class="table-responsive">
+      <table class="enterprise-table">
+        <thead>
+          <tr>
+            <th>Product & Passport ID</th>
+            <th>Sector</th>
+            <th>Material Composition</th>
+            <th>Carbon Footprint</th>
+            <th>Origin Facility</th>
+            <th>Status</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let p of filteredPassports"
+            class="table-row-interactive"
+            (click)="viewPassportDetails(p)"
+          >
+            <!-- Product & ID (Clean Text, No icon box) -->
+            <td class="product-info-cell">
+              <span class="product-name">{{ p.productName }}</span>
+              <span class="product-id-sub">{{ p.id }} · GTIN: {{ p.gtin }}</span>
+            </td>
 
-              <!-- Material & Circularity -->
-              <td>
-                <div class="material-col">
-                  <span class="material-text">{{ p.materialComposition }}</span>
-                  <span class="circularity-pill">{{ p.recycledContentPct }}% Recycled</span>
-                </div>
-              </td>
+            <!-- Sector (Clean Text, No badge) -->
+            <td class="cell-text-plain">{{ p.industry }}</td>
 
-              <!-- Carbon Footprint -->
-              <td>
-                <div class="carbon-pill">
-                  <mat-icon class="carbon-leaf">eco</mat-icon>
-                  <span>{{ p.carbonKgCo2e }} kg CO₂e</span>
-                </div>
-              </td>
+            <!-- Material & Circularity (Clean Text, No colorful badge) -->
+            <td class="material-info-cell">
+              <span class="material-name">{{ p.materialComposition }}</span>
+              <span class="material-sub">{{ p.recycledContentPct }}% Recycled content</span>
+            </td>
 
-              <!-- Origin Facility -->
-              <td class="facility-cell">
-                <span class="facility-name">{{ p.facilityOrigin }}</span>
-              </td>
+            <!-- Carbon Footprint (Clean Numeric Text, No green leaf pill) -->
+            <td class="cell-numeric">{{ p.carbonKgCo2e }} kg CO₂e</td>
 
-              <!-- Status (Using Reusable <app-status-badge>) -->
-              <td>
-                <app-status-badge [status]="p.status"></app-status-badge>
-              </td>
+            <!-- Origin Facility (Clean Text) -->
+            <td class="cell-text-plain">{{ p.facilityOrigin }}</td>
 
-              <!-- Actions -->
-              <td class="actions-cell" (click)="$event.stopPropagation()">
+            <!-- Status: Clean Functional Indicator (No bulky badge blocks) -->
+            <td>
+              <span class="status-indicator" [class]="'status-' + p.status">
+                <span class="status-dot"></span>
+                <span class="status-text">{{ p.status === 'published' ? 'Published' : (p.status === 'pending' ? 'In Review' : (p.status === 'draft' ? 'Draft' : p.status)) }}</span>
+              </span>
+            </td>
+
+            <!-- Actions -->
+            <td class="text-right" (click)="$event.stopPropagation()">
+              <div class="row-actions">
                 <button
                   type="button"
-                  class="action-icon-btn"
+                  class="action-btn"
                   title="Copy GS1 Digital Link"
                   (click)="copyDigitalLink(p.digitalLink, $event)"
                 >
@@ -152,24 +107,23 @@
                 </button>
                 <button
                   type="button"
-                  class="action-icon-btn"
+                  class="action-btn"
                   title="View Passport Details"
                   (click)="viewPassportDetails(p)"
                 >
                   <mat-icon>visibility</mat-icon>
                 </button>
-              </td>
-            </tr>
+              </div>
+            </td>
+          </tr>
 
-            <tr *ngIf="filteredPassports.length === 0">
-              <td colspan="7" class="empty-row">
-                <mat-icon class="empty-icon">search_off</mat-icon>
-                <p>No passports match your selected industry or status filter.</p>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+          <tr *ngIf="filteredPassports.length === 0">
+            <td colspan="7" class="empty-state-cell">
+              <p>No passports match your selected filters.</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-  </section>
+  </div>
 </div>

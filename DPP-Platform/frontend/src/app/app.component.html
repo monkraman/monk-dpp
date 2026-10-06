@@ -65,10 +65,39 @@
     </div>
   </aside>
 
-  <!-- Main Content Dashboard Viewport -->
-  <main class="main-viewport">
-    <div class="content-container">
+  <!-- Right App Container: Top Header + Main Viewport -->
+  <div class="app-main-wrapper">
+    <!-- Production-Grade Top Header Bar -->
+    <header class="app-top-header">
+      <div class="header-left">
+        <span class="header-page-title">{{ getPageTitle() }}</span>
+        <span class="header-tenant-chip">
+          <span class="status-dot"></span>
+          {{ currentUser?.organization?.name || 'Monkspaces Technologies' }}
+        </span>
+      </div>
+
+      <div class="header-right">
+        <!-- Theme Toggle -->
+        <button class="header-btn" (click)="toggleTheme()" [title]="isDark ? 'Switch to Light mode' : 'Switch to Dark mode'">
+          <span class="icon">{{ isDark ? '☀️' : '🌙' }}</span>
+          <span class="btn-text">{{ isDark ? 'Light' : 'Dark' }}</span>
+        </button>
+
+        <!-- User Profile -->
+        <div class="header-user-profile">
+          <div class="user-avatar-small">{{ getUserInitials() }}</div>
+          <span class="user-name-label">{{ getUserDisplayName() }}</span>
+          <button class="logout-btn" (click)="logout()" title="Sign Out">
+            <span class="icon">🚪</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Full-Width Viewport -->
+    <main class="main-viewport">
       <router-outlet></router-outlet>
-    </div>
-  </main>
+    </main>
+  </div>
 </div>
