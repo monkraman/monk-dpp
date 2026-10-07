@@ -20,6 +20,16 @@ const routes: Routes = [
   },
   { path: 'dashboard', redirectTo: 'product-passports' },
 
+  // Direct DPP Studio / Creation Wizard Route (Accessible directly for demos & testing)
+  {
+    path: 'create-passport',
+    loadComponent: () => import('./features/passports/dpp-wizard/dpp-wizard.component').then((m) => m.DppWizardComponent),
+  },
+  { path: 'dpp-wizard', redirectTo: 'create-passport' },
+  { path: 'create-dpp', redirectTo: 'create-passport' },
+
+
+
   // 1. Company Management (To & From Companies, Supply Chain Directory)
   {
     path: 'company-management',

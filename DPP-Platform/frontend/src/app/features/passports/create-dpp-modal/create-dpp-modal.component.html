@@ -1,0 +1,888 @@
+<!-- Full-Screen Enterprise DPP Studio Modal -->
+<div *ngIf="isOpen" class="dpp-studio-scrim" (click)="closeModal()">
+  <div class="dpp-studio-dialog" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+    
+    <!-- Top Studio Header -->
+    <header class="studio-topbar">
+      <div class="topbar-left">
+        <div class="studio-logo-badge">
+          <span class="monk-spark">✦</span>
+          <span class="studio-title">DPP Studio</span>
+        </div>
+        <span class="studio-divider">|</span>
+        <span class="studio-subtitle">ESPR Compliance & Digital Link Engine</span>
+      </div>
+
+      <div class="topbar-right">
+        <button type="button" class="close-btn" (click)="closeModal()" aria-label="Close Studio" title="Close">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </header>
+
+    <!-- Modal Body: Stage (Category Selection) OR Studio Workspace -->
+    <div class="studio-body">
+
+      <!-- ========================================================================= -->
+      <!-- VIEW 1: CATEGORY SELECTION STAGE                                          -->
+      <!-- ========================================================================= -->
+      <div *ngIf="!selectedCategoryKey" class="stage-container">
+        <div class="stage-hero">
+          <div class="hero-badge">European Ecodesign Regulation Ready (ESPR)</div>
+          <h1 class="hero-title">What product is this passport for?</h1>
+          <p class="hero-desc">
+            Select your industry sector. DPP Studio automatically loads mandatory EU delegated acts, product data schemas, and tiered public/authority visibility rules.
+          </p>
+
+          <!-- Search Input -->
+          <div class="stage-search-box">
+            <mat-icon class="search-icon">search</mat-icon>
+            <input
+              type="text"
+              [(ngModel)]="categorySearchQuery"
+              placeholder="Search product sector (e.g. 'lithium cell', 'textile', 'steel rebar', 'laptop')..."
+              class="stage-search-input"
+            />
+            <span *ngIf="categorySearchQuery" class="search-clear" (click)="categorySearchQuery = ''">✕</span>
+          </div>
+        </div>
+
+        <!-- Sector Tiles Grid -->
+        <div class="sector-grid">
+          <div
+            *ngFor="let cat of categoryList"
+            class="sector-card"
+            [style.--cat-color]="cat.color"
+            (click)="selectCategory(cat.id)"
+          >
+            <div class="sector-icon-wrapper">
+              <span class="sector-icon">{{ cat.icon }}</span>
+            </div>
+            <div class="sector-info">
+              <h3 class="sector-name">{{ cat.name }}</h3>
+              <span class="sector-regulation">{{ cat.regulation }}</span>
+              <div class="subcategories-pills">
+                <span *ngFor="let sub of cat.subcategories.slice(0, 3)" class="sub-pill">
+                  {{ sub }}
+                </span>
+                <span *ngIf="cat.subcategories.length > 3" class="sub-pill more">
+                  +{{ cat.subcategories.length - 3 }} more
+                </span>
+              </div>
+            </div>
+            <div class="sector-action-arrow">
+              <mat-icon>arrow_forward</mat-icon>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ========================================================================= -->
+      <!-- VIEW 2: DPP CREATION WORKSPACE                                            -->
+      <!-- ========================================================================= -->
+      <div *ngIf="selectedCategoryKey && activeCategory" class="workspace-container">
+        
+        <!-- Category & Smart-Fill Header Controls -->
+        <div class="workspace-header-bar">
+          <div class="sector-pill-group">
+            <button type="button" class="sector-switch-btn" (click)="backToCategorySelect()" title="Change Sector">
+              <span class="btn-icon">{{ activeCategory.icon }}</span>
+              <span class="btn-label">{{ activeCategory.name }}</span>
+              <mat-icon class="switch-arrow">unfold_more</mat-icon>
+            </button>
+
+            <select class="subcategory-select" [(ngModel)]="selectedSubcategory" aria-label="Subcategory">
+              <option *ngFor="let sub of activeCategory.subcategories" [value]="sub">{{ sub }}</option>
+            </select>
+
+            <span class="regulation-tag">{{ activeCategory.regulation }}</span>
+          </div>
+
+          <button type="button" class="smart-fill-toggle-btn" [class.active]="smartFillOpen" (click)="toggleSmartFill()">
+            <span class="btn-spark">✨</span>
+            <span>Smart Auto-Fill</span>
+            <mat-icon class="expand-icon">{{ smartFillOpen ? 'expand_less' : 'expand_more' }}</mat-icon>
+          </button>
+        </div>
+
+        <!-- Collapsible Smart Fill AI Panel -->
+        <div *ngIf="smartFillOpen" class="smart-fill-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <span class="sparkle">✨</span>
+              <strong>Smart Auto-Fill from Technical Datasheet</strong>
+            </div>
+            <span class="panel-subtitle">Paste raw specifications or supplier text — AI parser maps values directly to compliance fields.</span>
+          </div>
+          
+          <textarea
+            [(ngModel)]="smartFillText"
+            placeholder="Paste text, e.g.&#10;Product name: Zenith EV Pack 75kWh&#10;Rated capacity: 75 Ah&#10;Nominal voltage: 3.7 V&#10;Carbon footprint: 14.2 kg CO2e"
+            class="smart-textarea"
+            rows="4"
+          ></textarea>
+
+          <div class="smart-actions-row">
+            <button type="button" class="btn-smart-go" (click)="applySmartFill()">
+              <mat-icon>auto_fix_high</mat-icon>
+              <span>Auto-Fill Fields</span>
+            </button>
+            <button type="button" class="btn-smart-sample" (click)="loadSampleSmartFill()">
+              <span>Load Sample Specs</span>
+            </button>
+            <span *ngIf="smartFillMessage" class="smart-msg" [class.success]="smartFillMessage.includes('✨')">
+              {{ smartFillMessage }}
+            </span>
+          </div>
+        </div>
+
+        <!-- 3-Column Studio Grid: Steps Nav | Active Step Form | Live Passport Preview -->
+        <div class="studio-grid">
+
+          <!-- Left Step Navigation Sidebar -->
+          <nav class="steps-nav">
+            <button
+              *ngFor="let step of workflowSteps; let idx = index"
+              type="button"
+              class="step-nav-btn"
+              [class.active]="currentStepIndex === idx"
+              [class.completed]="step.isComplete"
+              (click)="goToStep(idx)"
+            >
+              <div class="step-badge" [class.done]="step.isComplete">
+                <span *ngIf="step.isComplete">✓</span>
+                <span *ngIf="!step.isComplete">{{ idx + 1 }}</span>
+              </div>
+              <div class="step-meta">
+                <span class="step-title">{{ step.title }}</span>
+                <span class="step-sub">{{ step.subtitle }}</span>
+              </div>
+            </button>
+          </nav>
+
+          <!-- Center Step Form Container -->
+          <main class="step-main-card">
+
+            <!-- STEP 0: Products & Quantities (BOM / Material Shelf) -->
+            <section *ngIf="currentStepIndex === 0" class="step-section">
+              <div class="section-heading">
+                <div>
+                  <h2 class="section-title">Products & Quantities</h2>
+                  <p class="section-desc">
+                    Specify raw materials, chemical components, or finished goods comprising this product passport, along with certified quantities.
+                  </p>
+                </div>
+                <span class="legal-badge" [class.done]="passportBom.length > 0">
+                  {{ passportBom.length ? '1/1 legal fields' : '0/1 legal fields' }}
+                </span>
+              </div>
+
+              <div class="bom-shelf-layout">
+                <!-- Left Shelf: Catalog Selection -->
+                <div class="shelf-panel">
+                  <div class="shelf-toolbar">
+                    <div class="shelf-search">
+                      <mat-icon>search</mat-icon>
+                      <input
+                        type="text"
+                        [(ngModel)]="bomSearchQuery"
+                        placeholder="Search product materials..."
+                        class="shelf-search-input"
+                      />
+                    </div>
+                    <div class="shelf-filter-toggles">
+                      <button
+                        type="button"
+                        class="toggle-btn"
+                        [class.active]="!bomFilterAll"
+                        (click)="bomFilterAll = false"
+                      >
+                        Suggested
+                      </button>
+                      <button
+                        type="button"
+                        class="toggle-btn"
+                        [class.active]="bomFilterAll"
+                        (click)="bomFilterAll = true"
+                      >
+                        All Products
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Catalog List -->
+                  <div class="catalog-list">
+                    <div
+                      *ngFor="let item of filteredProductCatalog"
+                      class="catalog-item-row"
+                    >
+                      <div class="catalog-item-icon">
+                        <span *ngIf="item.category === 'bat'">🔋</span>
+                        <span *ngIf="item.category === 'tex'">👕</span>
+                        <span *ngIf="item.category === 'con'">🏗️</span>
+                        <span *ngIf="item.category === 'ele'">💻</span>
+                        <span *ngIf="item.category === 'fur'">🪑</span>
+                        <span *ngIf="item.category === 'chem'">🧪</span>
+                      </div>
+                      <div class="catalog-item-info">
+                        <strong class="item-name">{{ item.name }}</strong>
+                        <span class="item-sub">Default Unit: {{ item.unit }} · Used in {{ item.usedCount }} DPPs</span>
+                      </div>
+                      <button
+                        *ngIf="!isInBom(item.id)"
+                        type="button"
+                        class="btn-add-item"
+                        (click)="addToBom(item)"
+                      >
+                        + Add
+                      </button>
+                      <button
+                        *ngIf="isInBom(item.id)"
+                        type="button"
+                        class="btn-added-item"
+                        (click)="removeFromBom(item.id)"
+                      >
+                        ✓ Added
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Inline Create New Product Option -->
+                  <div class="create-new-product-box">
+                    <button
+                      *ngIf="!showNewProductForm"
+                      type="button"
+                      class="btn-open-create-prod"
+                      (click)="showNewProductForm = true"
+                    >
+                      <mat-icon>add_circle_outline</mat-icon>
+                      <span>+ Create & Add New Product to Catalog</span>
+                    </button>
+
+                    <div *ngIf="showNewProductForm" class="new-product-inline-form">
+                      <h4>Create New Catalog Product</h4>
+                      <input
+                        type="text"
+                        [(ngModel)]="newProductName"
+                        placeholder="Product name (e.g. 'Lithium-ion Cell 21700')"
+                        class="form-input"
+                      />
+                      <div class="inline-row">
+                        <select [(ngModel)]="newProductType" class="form-select">
+                          <option *ngFor="let typeKey of ['Unit', 'Mass', 'Volume', 'Area', 'Length']" [value]="typeKey">
+                            {{ typeKey }} ({{ unitTypes[typeKey].join(', ') }})
+                          </option>
+                        </select>
+                      </div>
+                      <span *ngIf="newProductError" class="field-error">{{ newProductError }}</span>
+                      <div class="form-actions">
+                        <button type="button" class="btn-cancel" (click)="showNewProductForm = false">Cancel</button>
+                        <button type="button" class="btn-confirm" (click)="createNewProductInLibrary()">Create & Add</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right Bag: "In This Passport" -->
+                <div class="bag-panel">
+                  <div class="bag-header">
+                    <h3>In this passport <span class="count-badge">({{ passportBom.length }})</span></h3>
+                  </div>
+
+                  <div *ngIf="passportBom.length === 0" class="bag-empty-state">
+                    <span class="empty-icon">🧺</span>
+                    <strong>No products added yet</strong>
+                    <p>Select materials from the left shelf to establish the Bill of Materials.</p>
+                  </div>
+
+                  <div class="bag-list">
+                    <div *ngFor="let b of passportBom" class="bag-item-card" [class.invalid]="!(+b.amount > 0)">
+                      <div class="bag-item-top">
+                        <strong class="bag-item-name">{{ b.name }}</strong>
+                        <button type="button" class="btn-remove-bag" (click)="removeFromBom(b.id)" title="Remove">✕</button>
+                      </div>
+                      <div class="bag-amount-row">
+                        <div class="amount-input-wrap">
+                          <input
+                            type="number"
+                            [(ngModel)]="b.amount"
+                            placeholder="Amount"
+                            class="amount-input"
+                          />
+                          <select [(ngModel)]="b.unit" class="unit-select">
+                            <option *ngFor="let u of getUnitOptionsFor(b.unit)" [value]="u">{{ u }}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <span *ngIf="!(+b.amount > 0)" class="bag-hint-err">Enter amount > 0</span>
+                    </div>
+                  </div>
+
+                  <!-- Aggregated Totals Summary -->
+                  <div *ngIf="bomTotalSummary.length" class="bag-totals-summary">
+                    <span class="totals-label">Total Quantities:</span>
+                    <span *ngFor="let sumStr of bomTotalSummary" class="total-chip">{{ sumStr }}</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+
+            <!-- STEP 1: Product Identity & Origin -->
+            <section *ngIf="currentStepIndex === 1" class="step-section">
+              <div class="section-heading">
+                <div>
+                  <h2 class="section-title">Product Identity & Origin</h2>
+                  <p class="section-desc">Universal identification parameters required by EU Digital Product Passport standards.</p>
+                </div>
+                <span class="legal-badge" [class.done]="isSectionComplete(1, getCoreIdentityFields())">
+                  {{ getSectionCompletionSubtitle(1, getCoreIdentityFields()) }}
+                </span>
+              </div>
+
+              <div class="fields-grid">
+                <div *ngFor="let field of getCoreIdentityFields()" class="field-card" [class.required]="field.required" [class.filled]="!!getFieldValue(1, field)">
+                  <div class="field-header">
+                    <div class="field-label-group">
+                      <label class="field-label">{{ field.label }}</label>
+                      <span *ngIf="field.required" class="legal-tag">Legal</span>
+                    </div>
+                    <!-- Audience Visibility Toggle Button -->
+                    <button
+                      type="button"
+                      class="visibility-toggle-btn"
+                      [title]="'Visibility: ' + visibilityLabels[getFieldVisibility(1, field)]"
+                      (click)="toggleFieldVisibility(1, field)"
+                    >
+                      <span class="vis-icon">{{ visibilityIcons[getFieldVisibility(1, field)] }}</span>
+                      <span class="vis-text">{{ visibilityLabels[getFieldVisibility(1, field)] }}</span>
+                    </button>
+                  </div>
+
+                  <div class="field-control-wrap">
+                    <input
+                      type="text"
+                      [ngModel]="getFieldValue(1, field)"
+                      (ngModelChange)="setFieldValue(1, field, $event)"
+                      placeholder="Enter {{ field.label.toLowerCase() }}..."
+                      class="field-input"
+                    />
+                  </div>
+                  <span *ngIf="field.why" class="field-why-hint">{{ field.why }}</span>
+                </div>
+              </div>
+
+              <!-- Custom Notes / Fields Card -->
+              <div class="custom-fields-box">
+                <div class="custom-box-header">
+                  <strong>Custom Notes & Certifications for Product Identity</strong>
+                  <span class="custom-box-sub">Add supplementary documentation or team annotations.</span>
+                </div>
+                <div *ngIf="getCustomFieldsForSection(1).length" class="custom-fields-list">
+                  <div *ngFor="let cf of getCustomFieldsForSection(1)" class="custom-field-item">
+                    <div class="cf-top">
+                      <input type="text" [(ngModel)]="cf.name" placeholder="Field title..." class="cf-title-input" />
+                      <button type="button" class="visibility-toggle-btn" (click)="toggleCustomFieldVisibility(cf)">
+                        {{ visibilityIcons[cf.visibility] }} {{ visibilityLabels[cf.visibility] }}
+                      </button>
+                    </div>
+                    <textarea *ngIf="cf.type === 't'" [(ngModel)]="cf.textValue" placeholder="Enter custom note details..." class="cf-textarea" rows="2"></textarea>
+                    <div *ngIf="cf.type === 'f'" class="file-drop-preview">📎 {{ cf.fileName || 'Attached document' }}</div>
+                    <button type="button" class="btn-remove-cf" (click)="removeCustomField(cf.id)">Remove</button>
+                  </div>
+                </div>
+                <div class="custom-box-actions">
+                  <button type="button" class="btn-add-custom" (click)="addCustomField(1, 't')">+ Add Text Note</button>
+                  <button type="button" class="btn-add-custom" (click)="addCustomField(1, 'f')">+ Attach Document</button>
+                </div>
+              </div>
+            </section>
+
+
+            <!-- STEP 2 to N: Dynamic Sector Regulation Sections -->
+            <section *ngIf="currentStepIndex >= 2 && currentStepIndex < activeCategory.sections.length + 2" class="step-section">
+              <ng-container *ngIf="activeCategory.sections[currentStepIndex - 2] as activeSec">
+                <div class="section-heading">
+                  <div>
+                    <h2 class="section-title">{{ activeSec.title }}</h2>
+                    <p class="section-desc">Regulation parameters aligned with {{ activeCategory.regulation }}.</p>
+                  </div>
+                  <span class="legal-badge" [class.done]="isSectionComplete(currentStepIndex, activeSec.fields)">
+                    {{ getSectionCompletionSubtitle(currentStepIndex, activeSec.fields) }}
+                  </span>
+                </div>
+
+                <div class="fields-grid">
+                  <div
+                    *ngFor="let field of activeSec.fields"
+                    class="field-card"
+                    [class.required]="field.required"
+                    [class.filled]="!!getFieldValue(currentStepIndex, field)"
+                  >
+                    <div class="field-header">
+                      <div class="field-label-group">
+                        <label class="field-label">{{ field.label }}</label>
+                        <span *ngIf="field.required" class="legal-tag">Legal</span>
+                      </div>
+                      <button
+                        type="button"
+                        class="visibility-toggle-btn"
+                        [title]="'Visibility: ' + visibilityLabels[getFieldVisibility(currentStepIndex, field)]"
+                        (click)="toggleFieldVisibility(currentStepIndex, field)"
+                      >
+                        <span class="vis-icon">{{ visibilityIcons[getFieldVisibility(currentStepIndex, field)] }}</span>
+                        <span class="vis-text">{{ visibilityLabels[getFieldVisibility(currentStepIndex, field)] }}</span>
+                      </button>
+                    </div>
+
+                    <!-- Field Input Variations -->
+                    <div class="field-control-wrap">
+                      <!-- Select Dropdown -->
+                      <select
+                        *ngIf="field.type === 's'"
+                        [ngModel]="getFieldValue(currentStepIndex, field)"
+                        (ngModelChange)="setFieldValue(currentStepIndex, field, $event)"
+                        class="field-select"
+                      >
+                        <option value="">Select option...</option>
+                        <option *ngFor="let opt of field.unitOrOptions.split('|')" [value]="opt">{{ opt }}</option>
+                      </select>
+
+                      <!-- File Upload Drop Button -->
+                      <button
+                        *ngIf="field.type === 'f'"
+                        type="button"
+                        class="file-drop-btn"
+                        [class.has-file]="!!getFieldValue(currentStepIndex, field)"
+                        (click)="handleFileUpload(currentStepIndex, field)"
+                      >
+                        <mat-icon>{{ getFieldValue(currentStepIndex, field) ? 'attach_file' : 'cloud_upload' }}</mat-icon>
+                        <span>{{ getFieldValue(currentStepIndex, field) ? 'Attached: ' + getFieldValue(currentStepIndex, field) : 'Click to Upload Document (PDF/XLSX, Max 10MB)' }}</span>
+                      </button>
+
+                      <!-- Text or Number Input with Unit Suffix -->
+                      <div *ngIf="field.type === 't' || field.type === 'n' || field.type === 'p'" class="input-with-suffix">
+                        <input
+                          [type]="field.type === 'n' || field.type === 'p' ? 'number' : 'text'"
+                          [ngModel]="getFieldValue(currentStepIndex, field)"
+                          (ngModelChange)="setFieldValue(currentStepIndex, field, $event)"
+                          placeholder="Enter {{ field.label.toLowerCase() }}..."
+                          class="field-input"
+                        />
+                        <span *ngIf="field.type === 'p'" class="unit-suffix">%</span>
+                        <span *ngIf="field.type === 'n' && field.unitOrOptions" class="unit-suffix">{{ field.unitOrOptions }}</span>
+                      </div>
+                    </div>
+
+                    <span *ngIf="field.why" class="field-why-hint">{{ field.why }}</span>
+                  </div>
+                </div>
+
+                <!-- Custom Fields Drawer for this section -->
+                <div class="custom-fields-box">
+                  <div class="custom-box-header">
+                    <strong>Custom Notes & Files for {{ activeSec.title }}</strong>
+                    <span class="custom-box-sub">Add internal test certificates, laboratory reports or audit notes.</span>
+                  </div>
+                  <div *ngIf="getCustomFieldsForSection(currentStepIndex).length" class="custom-fields-list">
+                    <div *ngFor="let cf of getCustomFieldsForSection(currentStepIndex)" class="custom-field-item">
+                      <div class="cf-top">
+                        <input type="text" [(ngModel)]="cf.name" placeholder="Field title..." class="cf-title-input" />
+                        <button type="button" class="visibility-toggle-btn" (click)="toggleCustomFieldVisibility(cf)">
+                          {{ visibilityIcons[cf.visibility] }} {{ visibilityLabels[cf.visibility] }}
+                        </button>
+                      </div>
+                      <textarea *ngIf="cf.type === 't'" [(ngModel)]="cf.textValue" placeholder="Enter custom details..." class="cf-textarea" rows="2"></textarea>
+                      <div *ngIf="cf.type === 'f'" class="file-drop-preview">📎 {{ cf.fileName || 'Attached document' }}</div>
+                      <button type="button" class="btn-remove-cf" (click)="removeCustomField(cf.id)">Remove</button>
+                    </div>
+                  </div>
+                  <div class="custom-box-actions">
+                    <button type="button" class="btn-add-custom" (click)="addCustomField(currentStepIndex, 't')">+ Add Text Note</button>
+                    <button type="button" class="btn-add-custom" (click)="addCustomField(currentStepIndex, 'f')">+ Attach Document</button>
+                  </div>
+                </div>
+              </ng-container>
+            </section>
+
+
+            <!-- STEP N+1: Chain of Custody (Supply Chain Traceability) -->
+            <section *ngIf="currentStepIndex === activeCategory.sections.length + 2" class="step-section">
+              <div class="section-heading">
+                <div>
+                  <h2 class="section-title">Chain of Custody & Traceability</h2>
+                  <p class="section-desc">Connect this passport to upstream component supplier passports for verified tier-N provenance.</p>
+                </div>
+                <div class="chain-vis-badge">
+                  <button type="button" class="visibility-toggle-btn" (click)="toggleChainVisibility()">
+                    {{ visibilityIcons[chainVisibility] }} {{ visibilityLabels[chainVisibility] }}
+                  </button>
+                </div>
+              </div>
+
+              <div class="bom-shelf-layout">
+                <!-- Left: Published Passports Shelf -->
+                <div class="shelf-panel">
+                  <div class="shelf-toolbar">
+                    <div class="shelf-search">
+                      <mat-icon>search</mat-icon>
+                      <input
+                        type="text"
+                        [(ngModel)]="chainSearchQuery"
+                        placeholder="Search published upstream passports..."
+                        class="shelf-search-input"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="catalog-list">
+                    <div *ngFor="let item of filteredPublishedPassports" class="catalog-item-row">
+                      <div class="catalog-item-icon">⛓</div>
+                      <div class="catalog-item-info">
+                        <strong class="item-name">{{ item.p }}</strong>
+                        <span class="item-sub">#{{ item.pid }} · from {{ item.f }}</span>
+                      </div>
+                      <button
+                        *ngIf="!isChainConnected(item.pid)"
+                        type="button"
+                        class="btn-add-item"
+                        (click)="connectChainSource(item)"
+                      >
+                        + Connect
+                      </button>
+                      <button
+                        *ngIf="isChainConnected(item.pid)"
+                        type="button"
+                        class="btn-added-item"
+                        (click)="disconnectChainSource(item.pid)"
+                      >
+                        ✓ Connected
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Create Draft Link Box -->
+                  <div class="create-new-product-box">
+                    <button
+                      *ngIf="!showNewChainForm"
+                      type="button"
+                      class="btn-open-create-prod"
+                      (click)="showNewChainForm = true"
+                    >
+                      <mat-icon>link</mat-icon>
+                      <span>+ Create & Link New Supplier Draft</span>
+                    </button>
+
+                    <div *ngIf="showNewChainForm" class="new-product-inline-form">
+                      <h4>Create Source Passport Draft</h4>
+                      <input
+                        type="text"
+                        [(ngModel)]="newChainProduct"
+                        placeholder="Raw material or component name..."
+                        class="form-input"
+                      />
+                      <select [(ngModel)]="newChainSupplier" class="form-select" style="margin-top: 8px;">
+                        <option *ngFor="let s of supplierDirectory" [value]="s">{{ s }}</option>
+                      </select>
+                      <div class="inline-row" style="margin-top: 8px;">
+                        <input
+                          type="number"
+                          [(ngModel)]="newChainQuantity"
+                          placeholder="Quantity Used"
+                          class="form-input"
+                        />
+                        <select [(ngModel)]="newChainUnit" class="form-select" style="max-width: 100px;">
+                          <option value="kg">kg</option>
+                          <option value="t">t</option>
+                          <option value="unit">unit</option>
+                          <option value="m³">m³</option>
+                        </select>
+                      </div>
+                      <span *ngIf="newChainError" class="field-error">{{ newChainError }}</span>
+                      <div class="form-actions">
+                        <button type="button" class="btn-cancel" (click)="showNewChainForm = false">Cancel</button>
+                        <button type="button" class="btn-confirm" (click)="createDraftChainPassport()">Link Draft</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right: Connected Sources Bag & Flow Graph -->
+                <div class="bag-panel">
+                  <div class="bag-header">
+                    <h3>Connected Sources <span class="count-badge">({{ chainSources.length }})</span></h3>
+                  </div>
+
+                  <div *ngIf="chainSources.length === 0" class="bag-empty-state">
+                    <span class="empty-icon">⛓</span>
+                    <strong>No upstream sources connected</strong>
+                    <p>Connect source material passports from the shelf or link a new supplier draft.</p>
+                  </div>
+
+                  <div class="bag-list">
+                    <div *ngFor="let cs of chainSources" class="bag-item-card">
+                      <div class="bag-item-top">
+                        <strong class="bag-item-name">{{ cs.productName }}</strong>
+                        <button type="button" class="btn-remove-bag" (click)="disconnectChainSource(cs.pid)">✕</button>
+                      </div>
+                      <span class="bag-source-meta">#{{ cs.pid }} · {{ cs.supplier }}</span>
+                      <div class="bag-amount-row">
+                        <div class="amount-input-wrap">
+                          <input type="number" [(ngModel)]="cs.amount" placeholder="Amount" class="amount-input" />
+                          <span class="unit-text">{{ cs.unit }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Visual Flow Diagram -->
+                  <div *ngIf="chainSources.length" class="chain-flow-diagram">
+                    <div class="flow-sources-column">
+                      <span *ngFor="let cs of chainSources" class="flow-node-badge">
+                        ⛓ {{ cs.productName }}
+                      </span>
+                    </div>
+                    <span class="flow-arrow">➔</span>
+                    <div class="flow-destination-badge">
+                      <strong>{{ currentProductName }}</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+
+            <!-- STEP N+2: Review & Final Audit Check -->
+            <section *ngIf="currentStepIndex === totalWorkflowStepsCount - 1" class="step-section">
+              <div class="section-heading">
+                <div>
+                  <h2 class="section-title">Review & Verification</h2>
+                  <p class="section-desc">Audit your digital passport against mandatory ESPR rules before publishing.</p>
+                </div>
+                <span class="legal-badge" [class.done]="isAllLegalComplete()">
+                  {{ isAllLegalComplete() ? '✓ All Legal Fields Verified' : 'Action Required' }}
+                </span>
+              </div>
+
+              <div class="review-checklist-card">
+                <div class="review-stat-row">
+                  <div class="review-stat">
+                    <span class="stat-num">{{ overallCompletionPercentage }}%</span>
+                    <span class="stat-label">Legal Readiness</span>
+                  </div>
+                  <div class="review-stat">
+                    <span class="stat-num">{{ passportBom.length }}</span>
+                    <span class="stat-label">Material Inputs</span>
+                  </div>
+                  <div class="review-stat">
+                    <span class="stat-num">{{ chainSources.length }}</span>
+                    <span class="stat-label">Upstream Links</span>
+                  </div>
+                </div>
+
+                <div class="review-summary-table">
+                  <div class="summary-row">
+                    <span class="row-label">Product Name</span>
+                    <strong class="row-val">{{ currentProductName }}</strong>
+                  </div>
+                  <div class="summary-row">
+                    <span class="row-label">Industry Category</span>
+                    <span class="row-val">{{ activeCategory.name }} ({{ selectedSubcategory }})</span>
+                  </div>
+                  <div class="summary-row">
+                    <span class="row-label">Regulatory Mandate</span>
+                    <span class="row-val">{{ activeCategory.regulation }}</span>
+                  </div>
+                  <div class="summary-row">
+                    <span class="row-label">GS1 Digital Link URI</span>
+                    <code class="row-val code-link">https://dpp.monkspaces.com/id/01/{{ fieldValues['1_gtin'] || '0401234567899' }}</code>
+                  </div>
+                </div>
+
+                <div class="publish-prompt-box" [class.ready]="isAllLegalComplete()">
+                  <div *ngIf="isAllLegalComplete()" class="prompt-ready">
+                    <mat-icon class="ready-icon">verified</mat-icon>
+                    <div>
+                      <strong>Ready for Publication</strong>
+                      <p>All mandatory regulatory data points are verified. Ready to generate cryptographically signed GS1 QR code.</p>
+                    </div>
+                  </div>
+                  <div *ngIf="!isAllLegalComplete()" class="prompt-warning">
+                    <mat-icon class="warn-icon">warning</mat-icon>
+                    <div>
+                      <strong>Incomplete Legal Requirements</strong>
+                      <p>Please complete highlighted legal fields across sections before publishing.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+
+            <!-- Step Navigation Footer Bar -->
+            <footer class="step-footer-nav">
+              <button
+                type="button"
+                class="btn-nav-back"
+                [disabled]="currentStepIndex === 0"
+                (click)="prevStep()"
+              >
+                ← Back
+              </button>
+
+              <div class="footer-center-info">
+                <span class="step-indicator-text">Step {{ currentStepIndex + 1 }} of {{ totalWorkflowStepsCount }}</span>
+              </div>
+
+              <button
+                *ngIf="currentStepIndex < totalWorkflowStepsCount - 1"
+                type="button"
+                class="btn-nav-next"
+                (click)="nextStep()"
+              >
+                <span>Next: {{ workflowSteps[currentStepIndex + 1].title }}</span>
+                <mat-icon>arrow_forward</mat-icon>
+              </button>
+
+              <button
+                *ngIf="currentStepIndex === totalWorkflowStepsCount - 1"
+                type="button"
+                class="btn-publish-final"
+                [disabled]="!isAllLegalComplete()"
+                (click)="publishPassport()"
+              >
+                <mat-icon>publish</mat-icon>
+                <span>Publish Digital Passport</span>
+              </button>
+            </footer>
+
+          </main>
+
+
+          <!-- Right Column: Interactive Live Passport Preview Card -->
+          <aside class="passport-live-preview-card">
+            <!-- Header with QR & Title -->
+            <div class="preview-header">
+              <div class="preview-qr-box">
+                <!-- SVG Vector QR Code -->
+                <svg class="qr-svg" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M2 2h8v8H2V2zm2 2v4h4V4H4zm10-2h8v8h-8V2zm2 2v4h4V4h-4zM2 14h8v8H2v-8zm2 2v4h4v-4H4zm14 2h2v4h-2v-4zm-4-2h2v2h-2v-2zm4-4h2v2h-2v-2zm-2 2h2v2h-2v-2zm-4 4h2v2h-2v-2zm2 2h2v2h-2v-2zM6 6h2v2H6V6zm12 0h2v2h-2V6zM6 18h2v2H6v-2z"/>
+                </svg>
+              </div>
+              <div class="preview-title-meta">
+                <span class="preview-sub">{{ activeCategory.name }} Passport</span>
+                <h3 class="preview-name">{{ currentProductName }}</h3>
+                <span class="preview-status-chip">Live Preview</span>
+              </div>
+            </div>
+
+            <!-- Audience Lens Selector Bar -->
+            <div class="audience-lens-bar">
+              <span class="lens-label">View as:</span>
+              <div class="lens-button-group">
+                <button
+                  *ngFor="let l of lensLabels; let lIdx = index"
+                  type="button"
+                  class="lens-btn"
+                  [class.active]="activeLens === lIdx"
+                  (click)="activeLens = lIdx"
+                >
+                  {{ l }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Scrollable Preview Fields Body -->
+            <div class="preview-fields-scroll">
+
+              <!-- Section: Materials & Quantities -->
+              <div class="preview-section-block">
+                <h4 class="preview-section-title">Products & Quantities</h4>
+                <div *ngIf="passportBom.length === 0" class="preview-row missing">
+                  <span>Product Material</span>
+                  <span class="missing-tag">Missing</span>
+                </div>
+                <div *ngFor="let b of passportBom" class="preview-row">
+                  <span class="prop-name">{{ b.name }}</span>
+                  <span class="prop-val">{{ b.amount || '—' }} {{ b.unit }}</span>
+                </div>
+              </div>
+
+              <!-- Section: Product Identity -->
+              <div class="preview-section-block">
+                <h4 class="preview-section-title">Product Identity</h4>
+                <div *ngFor="let f of getCoreIdentityFields()" class="preview-row">
+                  <span class="prop-name">{{ f.label }}</span>
+                  <!-- If field is filled -->
+                  <ng-container *ngIf="getFieldValue(1, f) as val">
+                    <!-- If visible for active lens -->
+                    <span *ngIf="getFieldVisibility(1, f) <= activeLens" class="prop-val">{{ val }}</span>
+                    <!-- If hidden from this audience -->
+                    <span *ngIf="getFieldVisibility(1, f) > activeLens" class="prop-masked" title="Hidden from {{ lensLabels[activeLens] }}">██████</span>
+                  </ng-container>
+                  <ng-container *ngIf="!getFieldValue(1, f)">
+                    <span *ngIf="f.required" class="missing-tag">Missing</span>
+                    <span *ngIf="!f.required" class="mute-dot">·</span>
+                  </ng-container>
+                </div>
+              </div>
+
+              <!-- Dynamic Category Sections -->
+              <div *ngFor="let sec of activeCategory.sections; let secIdx = index" class="preview-section-block">
+                <h4 class="preview-section-title">{{ sec.title }}</h4>
+                <div *ngFor="let f of sec.fields" class="preview-row">
+                  <span class="prop-name">{{ f.label }}</span>
+                  <ng-container *ngIf="getFieldValue(secIdx + 2, f) as val">
+                    <span *ngIf="getFieldVisibility(secIdx + 2, f) <= activeLens" class="prop-val">
+                      {{ f.type === 'f' ? '📎 ' + val : val + (f.type === 'p' ? ' %' : (f.unitOrOptions ? ' ' + f.unitOrOptions : '')) }}
+                    </span>
+                    <span *ngIf="getFieldVisibility(secIdx + 2, f) > activeLens" class="prop-masked" title="Confidential from {{ lensLabels[activeLens] }}">██████</span>
+                  </ng-container>
+                  <ng-container *ngIf="!getFieldValue(secIdx + 2, f)">
+                    <span *ngIf="f.required" class="missing-tag">Missing</span>
+                    <span *ngIf="!f.required" class="mute-dot">·</span>
+                  </ng-container>
+                </div>
+              </div>
+
+              <!-- Chain of Custody in Preview -->
+              <div *ngIf="chainSources.length" class="preview-section-block">
+                <h4 class="preview-section-title">Chain of Custody</h4>
+                <div *ngFor="let cs of chainSources" class="preview-row">
+                  <span class="prop-name">⛓ {{ cs.productName }}</span>
+                  <span *ngIf="chainVisibility <= activeLens" class="prop-val">{{ cs.amount }} {{ cs.unit }}</span>
+                  <span *ngIf="chainVisibility > activeLens" class="prop-masked">██████</span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Preview Footer with Meter & Fast Publish -->
+            <div class="preview-footer">
+              <div class="progress-meter-wrap">
+                <div class="meter-bar">
+                  <div class="meter-fill" [style.width.%]="overallCompletionPercentage"></div>
+                </div>
+                <div class="meter-labels">
+                  <span class="meter-pct">{{ overallCompletionPercentage }}% Legal Data</span>
+                  <span class="meter-vis">{{ visibleFieldsForCurrentLens.visibleCount }} of {{ visibleFieldsForCurrentLens.totalCount }} visible to {{ lensLabels[activeLens] }}</span>
+                </div>
+              </div>
+
+              <div class="preview-action-row">
+                <button type="button" class="btn-save-draft" (click)="saveAsDraft()">Save Draft</button>
+                <button type="button" class="btn-live-publish" [disabled]="!isAllLegalComplete()" (click)="publishPassport()">Publish</button>
+              </div>
+            </div>
+
+          </aside>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>

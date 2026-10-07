@@ -126,4 +126,12 @@
       </table>
     </div>
   </div>
+
+  <!-- Interactive DPP Studio Creation Modal -->
+  <app-create-dpp-modal
+    [isOpen]="isCreateModalOpen"
+    (close)="isCreateModalOpen = false"
+    (passportCreated)="onPassportCreated($event)"
+  ></app-create-dpp-modal>
 </div>
+

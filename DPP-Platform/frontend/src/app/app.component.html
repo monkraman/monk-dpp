@@ -24,6 +24,11 @@
 
     <!-- Navigation List -->
     <nav class="nav-section">
+      <a routerLink="/create-passport" routerLinkActive="active" class="nav-item" title="Create DPP Studio">
+        <span class="icon">✨</span>
+        <span class="label" *ngIf="!isCollapsed">Create Passport</span>
+      </a>
+
       <a routerLink="/product-passports" routerLinkActive="active" class="nav-item" title="Digital Passports">
         <span class="icon">📊</span>
         <span class="label" *ngIf="!isCollapsed">Digital Passports</span>
@@ -44,6 +49,7 @@
         <span class="label" *ngIf="!isCollapsed">Manage Users</span>
       </a>
     </nav>
+
 
   </aside>
 

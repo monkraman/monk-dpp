@@ -43,8 +43,9 @@ export class ConfigService {
       NODE_ENV: process.env.NODE_ENV || 'development',
       DATABASE_URL: process.env.DATABASE_URL || '',
       JWT_SECRET: process.env.JWT_SECRET || 'change-this-in-production',
-      JWT_EXPIRATION: process.env.JWT_EXPIRATION || '15m',
-      REFRESH_TOKEN_EXPIRATION: process.env.REFRESH_TOKEN_EXPIRATION || '7d',
+      JWT_EXPIRATION: process.env.JWT_EXPIRATION || '24h',
+      REFRESH_TOKEN_EXPIRATION: process.env.REFRESH_TOKEN_EXPIRATION || '30d',
+
       FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:4200',
       S3_BUCKET: process.env.S3_BUCKET || '',
       S3_REGION: process.env.S3_REGION || 'us-east-1',

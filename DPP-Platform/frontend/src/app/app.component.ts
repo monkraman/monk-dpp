@@ -86,6 +86,7 @@ export class AppComponent implements OnInit {
 
   getPageTitle(): string {
     const url = this.router.url;
+    if (url.includes('/create-passport') || url.includes('/dpp-wizard')) return 'DPP Creation Studio';
     if (url.includes('/dashboard')) return 'Operations Hub';
     if (url.includes('/product-passports') || url.includes('/dpps')) return 'Digital Passports';
     if (url.includes('/company-management')) return 'Company Management';

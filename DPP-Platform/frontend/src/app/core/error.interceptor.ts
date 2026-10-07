@@ -42,11 +42,15 @@ export class ErrorInterceptor implements HttpInterceptor {
               4500
             );
           } else if (error.status === 401) {
-            // Only show if not a public endpoint
-            if (!request.url.includes('/public/')) {
-              this.toastService.show('Session expired or unauthorized. Please re-login.', 'warning', 3500);
+            // Do not show session expired toast for auth endpoints or when already on auth pages
+            const isAuthEndpoint = request.url.includes('/auth/') || request.url.includes('/public/');
+            const isOnAuthPage = typeof window !== 'undefined' && (window.location.pathname.includes('/login') || window.location.pathname.includes('/register'));
+            
+            if (!isAuthEndpoint && !isOnAuthPage) {
+              this.toastService.show('Session expired. Please log in again.', 'warning', 3500);
             }
-          } else if (error.status === 404) {
+          }
+ else if (error.status === 404) {
             this.toastService.show(errorMessage || 'Requested resource not found.', 'error', 3500);
           } else if (error.status === 400) {
             this.toastService.show(errorMessage || 'Invalid request. Please check input fields.', 'error', 4000);

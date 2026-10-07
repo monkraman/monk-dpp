@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { MaterialModule } from '../../shared/material.module';
 import { SharedModule } from '../../shared/shared.module';
 import { DashboardComponent } from './dashboard.component';
+import { CreateDppModalComponent } from '../passports/create-dpp-modal/create-dpp-modal.component';
 
 const routes: Routes = [{ path: '', component: DashboardComponent }];
 
@@ -16,7 +17,9 @@ const routes: Routes = [{ path: '', component: DashboardComponent }];
     FormsModule,
     MaterialModule,
     SharedModule,
+    CreateDppModalComponent,
     RouterModule.forChild(routes),
   ],
 })
 export class DashboardModule {}
+

@@ -5,6 +5,7 @@ import { ThemeService } from '../../core/services/theme.service';
 import { ToastService } from '../../core/services/toast.service';
 import { ThemePreset } from '../../core/config/theme.config';
 import { FilterTabItem } from '../../shared/components/filter-tabs/filter-tabs.component';
+import { CreatedPassportResult } from '../passports/create-dpp-modal/create-dpp-modal.component';
 
 export type IndustryCategory = 'ALL' | 'TEXTILES' | 'BATTERIES' | 'ELECTRONICS' | 'PACKAGING';
 
@@ -33,6 +34,9 @@ export class DashboardComponent implements OnInit {
   currentUser: User | null = null;
   activeTheme!: ThemePreset;
   showThemePicker = false;
+
+  // Create DPP Studio Modal State
+  isCreateModalOpen = false;
 
   // Search & Filter state
   searchQuery = '';
@@ -221,7 +225,50 @@ export class DashboardComponent implements OnInit {
   }
 
   createNewPassport(): void {
-    this.toastService.show('Initiating new Digital Product Passport registration...', 'info', 2500);
+    this.isCreateModalOpen = true;
+  }
+
+  onPassportCreated(result: CreatedPassportResult): void {
+    const industryLabel: 'Textiles' | 'Batteries' | 'Electronics' | 'Packaging' =
+      result.industryCode === 'TEXTILES'
+        ? 'Textiles'
+        : result.industryCode === 'BATTERIES'
+        ? 'Batteries'
+        : result.industryCode === 'ELECTRONICS'
+        ? 'Electronics'
+        : 'Packaging';
+
+    const newItem: UniversalDppItem = {
+      id: result.id,
+      gtin: result.gtin,
+      productName: result.productName,
+      modelOrBatch: result.modelOrBatch,
+      industry: industryLabel,
+      industryCode: result.industryCode,
+      materialComposition: result.materialComposition,
+      recycledContentPct: result.recycledContentPct,
+      carbonKgCo2e: result.carbonKgCo2e,
+      facilityOrigin: result.facilityOrigin,
+      status: result.status,
+      lastUpdated: 'Just now',
+      digitalLink: result.digitalLink,
+    };
+
+    this.passports.unshift(newItem);
+    this.updateTabCounts();
+  }
+
+  private updateTabCounts(): void {
+    const publishedCount = this.passports.filter((p) => p.status === 'published').length;
+    const pendingCount = this.passports.filter((p) => p.status === 'pending').length;
+    const draftCount = this.passports.filter((p) => p.status === 'draft').length;
+
+    this.statusTabs = [
+      { id: 'ALL', label: 'All Statuses' },
+      { id: 'published', label: `Published (${publishedCount})` },
+      { id: 'pending', label: `In Review (${pendingCount})` },
+      { id: 'draft', label: `Draft (${draftCount})` },
+    ];
   }
 
   exportAuditReport(): void {
@@ -238,3 +285,4 @@ export class DashboardComponent implements OnInit {
     this.toastService.show(`Opening ${passport.id} — ${passport.productName}`, 'info', 2000);
   }
 }
+
